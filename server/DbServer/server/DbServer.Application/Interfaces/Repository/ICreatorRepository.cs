@@ -5,9 +5,9 @@ namespace DbServer.Application.Interfaces.Repository;
 
 public interface ICreatorRepository
 {
-    public CreationEntity Get();
-    public CreationEntity Add();
-    public CreationEntity Delete();
-    public CreationEntity[] GetMany();
-    public CreationEntity[] DeleteMany();
+    public Task<CreationEntity> Get();
+    public Task<CreationEntity> Add();
+    public Task<CreationEntity> Delete();
+    public Task<CreationEntity[]> GetMany();
+    public Task<CreationEntity[]> DeleteMany();
 }

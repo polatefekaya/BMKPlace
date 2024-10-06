@@ -5,10 +5,10 @@ namespace DbServer.Application.Interfaces.Repository;
 
 public interface IUserRepository
 {
-    public UserEntity Get();
-    public UserEntity Add();
-    public UserEntity Delete();
-    public UserEntity Update();
-    public UserEntity[] GetMany();
-    public UserEntity[] DeleteMany();
+    public Task<UserEntity> Get();
+    public Task<UserEntity> Add();
+    public Task<UserEntity> Delete();
+    public Task<UserEntity> Update();
+    public Task<UserEntity[]> GetMany();
+    public Task<UserEntity[]> DeleteMany();
 }

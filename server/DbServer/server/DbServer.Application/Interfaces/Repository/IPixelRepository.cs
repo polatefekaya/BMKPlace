@@ -5,12 +5,12 @@ namespace DbServer.Application.Interfaces.Repository;
 
 public interface IPixelRepository
 {
-    public PixelEntity Get();
-    public PixelEntity Add();
-    public PixelEntity Delete();
-    public PixelEntity GetByPosition();
-    public PixelEntity[] GetManyByDate();
-    public PixelEntity[] GetManyByColor();
-    public PixelEntity[] DeleteManyByDate();
-    public PixelEntity[] DeleteManyByColor();
+    public Task<PixelEntity> Get();
+    public Task<PixelEntity> Add();
+    public Task<PixelEntity> Delete();
+    public Task<PixelEntity> GetByPosition();
+    public Task<PixelEntity[]> GetManyByDate();
+    public Task<PixelEntity[]> GetManyByColor();
+    public Task<PixelEntity[]> DeleteManyByDate();
+    public Task<PixelEntity[]> DeleteManyByColor();
 }

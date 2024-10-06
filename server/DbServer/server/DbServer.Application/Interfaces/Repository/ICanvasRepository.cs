@@ -5,10 +5,10 @@ namespace DbServer.Application.Interfaces.Repository;
 
 public interface ICanvasRepository
 {
-    public CanvasEntity Get();
-    public CanvasEntity Add();
-    public CanvasEntity Delete();
-    public CanvasEntity Update();
-    public CanvasEntity[] GetMany();
-    public CanvasEntity[] DeleteMany();
+    public Task<CanvasEntity> Get();
+    public Task<CanvasEntity> Add();
+    public Task<CanvasEntity> Delete();
+    public Task<CanvasEntity> Update();
+    public Task<CanvasEntity[]> GetMany();
+    public Task<CanvasEntity[]> DeleteMany();
 }
