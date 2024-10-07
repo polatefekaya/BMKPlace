@@ -30,8 +30,14 @@ public class UserRepository : IUserRepository
 
     public async Task<UserEntity> Get()
     {
-        await _unitOfWork.Connection.QueryFirstOrDefaultAsync<UserEntity>("",new {Id = 1},_unitOfWork.Transaction);
-        throw new NotImplementedException();
+        UserEntity? entity = await _unitOfWork.Connection.QueryFirstOrDefaultAsync<UserEntity>(
+            "SELECT * FROM users WHEN @id == users.id",
+            new {Id = 1},
+            _unitOfWork.Transaction);
+            if(entity is null){
+                
+            }
+            return entity;
     }
 
     public Task<UserEntity[]> GetMany()
