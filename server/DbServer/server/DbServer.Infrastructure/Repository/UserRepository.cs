@@ -31,7 +31,7 @@ public class UserRepository : IUserRepository
     public async Task<UserEntity> Get()
     {
         UserEntity? entity = await _unitOfWork.Connection.QueryFirstOrDefaultAsync<UserEntity>(
-            "SELECT * FROM users WHEN @id == users.id",
+            "SELECT * FROM users WHERE Id = @Id",
             new {Id = 1},
             _unitOfWork.Transaction);
             if(entity is null){

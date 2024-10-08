@@ -2,7 +2,7 @@ using System;
 
 namespace DbServer.Application.Interfaces.Services.MessageQueue;
 
-public interface IMessageConsumer
+public interface IOnReceived
 {
-    void Consume();
+    public void OnReceived();
 }
