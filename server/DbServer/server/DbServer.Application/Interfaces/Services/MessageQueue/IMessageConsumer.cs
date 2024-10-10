@@ -4,5 +4,5 @@ namespace DbServer.Application.Interfaces.Services.MessageQueue;
 
 public interface IMessageConsumer
 {
-    void Consume();
+    void Consume(Func<int> operation);
 }
