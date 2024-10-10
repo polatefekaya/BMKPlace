@@ -6,16 +6,16 @@ namespace DbServer.Application.Interfaces.Repository;
 
 public interface IContributionRepository
 {
-    public Task<DatabaseResult<ContributionEntity>> Get();
-    public Task<DatabaseResult<ContributionEntity>> Add();
-    public Task<DatabaseResult<ContributionEntity>> Delete();
-    public Task<DatabaseResult<IEnumerable<ContributionEntity>>> GetMany();
-    public Task<DatabaseResult<IEnumerable<ContributionEntity>>> DeleteMany();
-    public Task<DatabaseResult<ContributionEntity>> GetByPosition();
-    public Task<DatabaseResult<IEnumerable<ContributionEntity>>> GetManyByUserId();
-    public Task<DatabaseResult<IEnumerable<ContributionEntity>>> GetManyByCanvasId();
-    public Task<DatabaseResult<IEnumerable<ContributionEntity>>> GetManyByPixelId();
-    public Task<DatabaseResult<IEnumerable<ContributionEntity>>> DeleteManyByUserId();
-    public Task<DatabaseResult<IEnumerable<ContributionEntity>>> DeleteManyByCanvasId();
-    public Task<DatabaseResult<IEnumerable<ContributionEntity>>> DeleteManyByPixelId();
+    public Task<DatabaseResult<ContributionEntity>> Get(int id);
+    public Task<DatabaseResult<ContributionEntity>> Add(ContributionEntity entity);
+    public Task<DatabaseResult<ContributionEntity>> Delete(int id);
+    public Task<DatabaseResult<ContributionEntity>> GetByPositionWithCanvasId(string position, int canvasId);
+    public Task<DatabaseResult<IEnumerable<ContributionEntity>>> GetManyByUserId(int userId);
+    public Task<DatabaseResult<IEnumerable<ContributionEntity>>> GetManyByCanvasId(int canvasId);
+    public Task<DatabaseResult<IEnumerable<ContributionEntity>>> GetManyByPixelId(int pixelId);
+    public Task<DatabaseResult<IEnumerable<ContributionEntity>>> DeleteManyByUserId(int userId);
+    public Task<DatabaseResult<IEnumerable<ContributionEntity>>> DeleteManyByCanvasId(int canvasId);
+    public Task<DatabaseResult<IEnumerable<ContributionEntity>>> DeleteManyByPixelId(int pixelId);
+    public Task<DatabaseResult<ContributionEntity>> DeleteByPositionWithCanvasId(string position, int canvasId);
 }
+

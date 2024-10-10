@@ -14,82 +14,144 @@ namespace DbServer.Infrastructure.Repository;
 public class PixelRepository : IPixelRepository
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IPixelQueryService _pixelQueryService;
+    private readonly IPixelQueryService _queryService;
     private readonly ILogger<PixelRepository> _logger;
-
-    public PixelRepository(IUnitOfWork unitOfWork, ISqlQueryServiceFactory sqlServiceFactory, ILogger<PixelRepository> logger)
+    private readonly IRepositoryHelper _helper;
+    private readonly string _className;
+    public PixelRepository(IUnitOfWork unitOfWork, ISqlQueryServiceFactory sqlServiceFactory, ILogger<PixelRepository> logger, IRepositoryHelper helper)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
-        _pixelQueryService = sqlServiceFactory.Create().PixelQueryService();
-    }
-    public Task<DatabaseResult<PixelEntity>> Add()
-    {
-        string sql = _pixelQueryService.Add;
-        throw new NotImplementedException();
+
+        _helper = helper;
+        _className = this.GetType().Name;
+        _queryService = sqlServiceFactory.Create().PixelQueryService();
     }
 
-    public Task<DatabaseResult<PixelEntity>> Delete()
+    public async Task<DatabaseResult<PixelEntity>> Add(PixelEntity entity)
     {
-        string sql = _pixelQueryService.DeleteById;
-        throw new NotImplementedException();
+        string methodName = nameof(Add);
+
+        DatabaseResult<PixelEntity> result = await _helper.ExecuteAsync<PixelEntity>(async () => {
+            string sql = _queryService.Add;
+            return await _unitOfWork.Connection.ExecuteAsync(
+                sql,
+                entity,
+                _unitOfWork.Transaction
+            );
+        },
+            methodName,
+            _className
+        );
+        return result;
     }
 
-    public Task<DatabaseResult<IEnumerable<PixelEntity>>> DeleteManyByColor()
+    public async Task<DatabaseResult<PixelEntity>> Delete(int id)
     {
-        string sql = _pixelQueryService.DeleteManyByColor;
-        throw new NotImplementedException();
+        string methodName = nameof(Delete);
+
+        DatabaseResult<PixelEntity> result = await _helper.ExecuteAsync<PixelEntity>(async () => {
+            string sql = _queryService.DeleteById;
+            return await _unitOfWork.Connection.ExecuteAsync(
+                sql,
+                new {Id = id},
+                _unitOfWork.Transaction
+            );
+        }, methodName, _className);
+        return result;
     }
 
-    public Task<DatabaseResult<IEnumerable<PixelEntity>>> DeleteManyByDate()
+    public async Task<DatabaseResult<IEnumerable<PixelEntity>>> DeleteManyByColor(string color)
     {
-        string sql = _pixelQueryService.DeleteManyByDate;
-        throw new NotImplementedException();
+        string methodName = nameof(DeleteManyByColor);
+
+        DatabaseResult<IEnumerable<PixelEntity>> result = await _helper.ExecuteAsync<IEnumerable<PixelEntity>>(async () => {
+            string sql = _queryService.DeleteManyByColor;
+            return await _unitOfWork.Connection.ExecuteAsync(
+                sql,
+                new {Color = color},
+                _unitOfWork.Transaction
+            );
+        }, methodName, _className);
+        return result;
+    }
+
+    public async Task<DatabaseResult<IEnumerable<PixelEntity>>> DeleteManyByDate(string date)
+    {
+        string methodName = nameof(DeleteManyByDate);
+
+        DatabaseResult<IEnumerable<PixelEntity>> result = await _helper.ExecuteAsync<IEnumerable<PixelEntity>>(async () => {
+            string sql = _queryService.DeleteManyByDate;
+            return await _unitOfWork.Connection.ExecuteAsync(
+                sql,
+                new {Date = date},
+                _unitOfWork.Transaction
+            );
+        }, methodName, _className);
+        return result;
     }
 
     public async Task<DatabaseResult<PixelEntity>> Get(int id)
     {
-        _unitOfWork.Begin();
-        _logger.LogDebug("Pixel Get Transaction Began");
+        string methodName = nameof(Get);
 
-        string sql = _pixelQueryService.GetById;
-        PixelEntity? entity = await _unitOfWork.Connection.QueryFirstOrDefaultAsync<PixelEntity>(
-            sql,
-            new { Id = id },
-            _unitOfWork.Transaction);
-
-        if (entity is null)
-        {
-            _logger.LogWarning("Pixel Entity not found");
-
-            _unitOfWork.Rollback();
-            _logger.LogDebug("Pixel Get Transaction Rolledback");
-            
-            return DatabaseResult<PixelEntity>.Error("Pixel Entity not found", ErrorTypes.NotFound);
-        }
-
-        _unitOfWork.Commit();
-        _logger.LogDebug("Pixel Get Transaction Committed");
-
-        _logger.LogInformation("Pixel Entity found");
-        return DatabaseResult<PixelEntity>.Success(entity);
+        DatabaseResult<PixelEntity> result = await _helper.QueryAsync(async () => {
+            string sql = _queryService.GetById;
+            return await _unitOfWork.Connection.QueryFirstOrDefaultAsync<PixelEntity>(
+                sql,
+                new {Id = id},
+                _unitOfWork.Transaction
+            );
+        }, methodName, _className
+        );
+        return result;
     }
 
-    public Task<DatabaseResult<PixelEntity>> GetByPosition()
+    public async Task<DatabaseResult<PixelEntity>> GetByPosition(string position, int canvasId)
     {
-        string sql = _pixelQueryService.GetManyByPosition;
-        throw new NotImplementedException();
+        string methodName = "GetByPositionWithCanvasId";
+
+        DatabaseResult<PixelEntity> result = await _helper.QueryAsync(async () => {
+            string sql = _queryService.GetByPositionWithCanvasId;
+            return await _unitOfWork.Connection.QueryFirstOrDefaultAsync<PixelEntity>(
+                sql,
+                new {Position = position, CanvasId = canvasId},
+                _unitOfWork.Transaction
+            );
+        }, methodName, _className
+        );
+        return result;
     }
 
-    public Task<DatabaseResult<IEnumerable<PixelEntity>>> GetManyByColor()
+    public async Task<DatabaseResult<IEnumerable<PixelEntity>>> GetManyByColor(string color)
     {
-        string sql = _pixelQueryService.GetManyByColor;
-        throw new NotImplementedException();
+        string methodName = nameof(GetManyByColor);
+
+        DatabaseResult<IEnumerable<PixelEntity>> result = await _helper.QueryAsync(async () => {
+            string sql = _queryService.GetManyByColor;
+            return await _unitOfWork.Connection.QueryAsync<PixelEntity>(
+                sql,
+                new {Color = color},
+                _unitOfWork.Transaction
+            );
+        }, methodName, _className
+        );
+        return result;
     }
 
-    public Task<DatabaseResult<IEnumerable<PixelEntity>>> GetManyByDate()
+    public async Task<DatabaseResult<IEnumerable<PixelEntity>>> GetManyByDate(string date)
     {
-        string sql = _pixelQueryService.GetManyByDate;
-        throw new NotImplementedException();
+        string methodName = nameof(GetManyByDate);
+
+        DatabaseResult<IEnumerable<PixelEntity>> result = await _helper.QueryAsync(async () => {
+            string sql = _queryService.GetManyByDate;
+            return await _unitOfWork.Connection.QueryAsync<PixelEntity>(
+                sql,
+                new {Date = date},
+                _unitOfWork.Transaction
+            );
+        }, methodName, _className
+        );
+        return result;
     }
 }

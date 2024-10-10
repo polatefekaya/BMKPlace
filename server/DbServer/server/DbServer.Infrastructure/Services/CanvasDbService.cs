@@ -1,39 +1,68 @@
 using System;
+using DbServer.Application.Interfaces.Repository;
 using DbServer.Application.Interfaces.Services.Database;
+using DbServer.Application.Interfaces.UnitOfWork;
 using DbServer.Domain.Data.Entities;
+using DbServer.Domain.Data.Models.Errors;
 using DbServer.Domain.Data.Results;
+using Microsoft.Extensions.Logging;
 
 namespace DbServer.Infrastructure.Services;
 
 public class CanvasDbService : ICanvasDbService
 {
-    public Task<DatabaseResult<CanvasEntity>> Add()
-    {
-        throw new NotImplementedException();
+    private readonly ICanvasRepository _repository;
+    private readonly IDbServiceHelper _helper;
+    private readonly string _className;
+
+    public CanvasDbService(ICanvasRepository canvasRepository, IDbServiceHelper helper){
+        _repository = canvasRepository;
+
+        _helper = helper;
+        _className = this.GetType().Name;
     }
 
-    public Task<DatabaseResult<CanvasEntity>> Delete()
+    public async Task<DatabaseResult<CanvasEntity>> Add(CanvasEntity entity)
     {
-        throw new NotImplementedException();
+        string methodName = nameof(Add);
+
+        DatabaseResult<CanvasEntity> result = await _helper.RunWithTransaction(async () => {
+            return await _repository.Add(entity);
+        }, methodName, _className);
+
+        return result;
     }
 
-    public Task<DatabaseResult<IEnumerable<CanvasEntity>>> DeleteManyByUserId()
+    public async Task<DatabaseResult<CanvasEntity>> Delete(int id)
     {
-        throw new NotImplementedException();
+        string methodName = nameof(Delete);
+
+        DatabaseResult<CanvasEntity> result = await _helper.RunWithTransaction(async () => {
+            return await _repository.Delete(id);
+        }, methodName, _className);
+
+        return result;
     }
 
-    public Task GetContributors()
+    public async Task<DatabaseResult<CanvasEntity>> Get(int id)
     {
-        throw new NotImplementedException();
+        string methodName = nameof(Get);
+
+        DatabaseResult<CanvasEntity> result = await _helper.Run(async () => {
+            return await _repository.Get(id);
+        }, methodName, _className);
+
+        return result;
     }
 
-    public Task<DatabaseResult<UserEntity>> GetCreator()
+    public async Task<DatabaseResult<CanvasEntity>> Update(CanvasEntity entity)
     {
-        throw new NotImplementedException();
-    }
+        string methodName = nameof(Update);
 
-    public Task<DatabaseResult<IEnumerable<CanvasEntity>>> GetManyByUserId()
-    {
-        throw new NotImplementedException();
+        DatabaseResult<CanvasEntity> result = await _helper.RunWithTransaction(async () => {
+            return await _repository.Update(entity);
+        }, methodName, _className);
+
+        return result;
     }
 }

@@ -14,7 +14,7 @@ public class DatabaseResult<T>
 
     public DatabaseResult(){}
 
-    private DatabaseResult(T? data, DatabaseModel model, int rowsAffected = 0){
+    private DatabaseResult(T? data, DatabaseModel model, int rowsAffected = 1){
         Data = data;
         Model = model;
         Timestamp = DateTime.UtcNow;

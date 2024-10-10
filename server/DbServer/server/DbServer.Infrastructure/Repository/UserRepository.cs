@@ -14,137 +14,85 @@ namespace DbServer.Infrastructure.Repository;
 public class UserRepository : IUserRepository
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IUserQueryService _userQueryService;
+    private readonly IUserQueryService _queryService;
     private readonly ILogger<UserRepository> _logger;
-
-    public UserRepository(IUnitOfWork unitOfWork, ISqlQueryServiceFactory sqlServiceFactory, ILogger<UserRepository> logger)
+    private readonly IRepositoryHelper _helper;
+    private readonly string _className;
+    public UserRepository(IUnitOfWork unitOfWork, ISqlQueryServiceFactory sqlServiceFactory, ILogger<UserRepository> logger, IRepositoryHelper helper)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
 
-        _userQueryService = sqlServiceFactory.Create().UserQueryService();
+        _helper = helper;
+        _className = this.GetType().Name;
+        _queryService = sqlServiceFactory.Create().UserQueryService();
     }
     public async Task<DatabaseResult<UserEntity>> Add(UserEntity entity)
     {
-        _unitOfWork.Begin();
-        _logger.LogDebug("User Add Transaction Began");
+        string methodName = nameof(Add);
 
-        string sql = _userQueryService.Add;
-        int rowsAffected = await _unitOfWork.Connection.ExecuteAsync(
-            sql,
-            entity,
-            _unitOfWork.Transaction
+        DatabaseResult<UserEntity> result = await _helper.ExecuteAsync<UserEntity>(async () => {
+            string sql = _queryService.Add;
+            return await _unitOfWork.Connection.ExecuteAsync(
+                sql,
+                entity,
+                _unitOfWork.Transaction
+            );
+        },
+            methodName,
+            _className
         );
-        
-        if (rowsAffected < 1){
-            _logger.LogWarning("No rows affected, Addition can not be made");
-
-            _unitOfWork.Rollback();
-            _logger.LogDebug("User Add Transaction Rolledback");
-
-            return DatabaseResult<UserEntity>.Error("No rows affected, Addition can not be made", ErrorTypes.CanNotMade, rowsAffected);
-        }
-
-        _unitOfWork.Commit();
-        _logger.LogDebug("User Add Transaction Committed");
-
-        _logger.LogInformation("User Additon is succesful");
-        return DatabaseResult<UserEntity>.Success();
+        return result;
     }
 
     public async Task<DatabaseResult<UserEntity>> Delete(int id)
     {
-        _unitOfWork.Begin();
-        _logger.LogDebug("User Delete Transaction Began");
+        string methodName = nameof(Delete);
 
-        string sql = _userQueryService.DeleteById;
-        int rowsAffected = await _unitOfWork.Connection.ExecuteAsync(
-            sql,
-            new { Id = id },
-            _unitOfWork.Transaction
-        );
-
-        if (rowsAffected < 1){
-            _logger.LogWarning("No rows affected, Deletion can not be made");
-
-            _unitOfWork.Rollback();
-            _logger.LogDebug("User Delete Transaction Rolledback");
-
-            return DatabaseResult<UserEntity>.Error("No rows affected, Deletion can not be made", ErrorTypes.CanNotMade, rowsAffected);
-        }
-
-        _unitOfWork.Commit();
-        _logger.LogDebug("User Delete Transaction Committed");
-
-        _logger.LogInformation("User Deletion is successful");
-        return DatabaseResult<UserEntity>.Success();
-    }
-
-    public Task<DatabaseResult<IEnumerable<UserEntity>>> DeleteMany()
-    {
-
-        throw new NotImplementedException();
+        DatabaseResult<UserEntity> result = await _helper.ExecuteAsync<UserEntity>(async () => {
+            string sql = _queryService.DeleteById;
+            return await _unitOfWork.Connection.ExecuteAsync(
+                sql,
+                new {Id = id},
+                _unitOfWork.Transaction
+            );
+        }, methodName, _className);
+        return result;
     }
 
     public async Task<DatabaseResult<UserEntity>> Get(int id)
     {
-        _unitOfWork.Begin();
-        _logger.LogDebug("User Get Transaction Began");
+        string methodName = nameof(Get);
 
-        string sql = _userQueryService.GetById;
-        UserEntity? entity = await _unitOfWork.Connection.QueryFirstOrDefaultAsync<UserEntity>(
-            sql,
-            new { Id = id },
-            _unitOfWork.Transaction);
-
-        if (entity is null)
-        {
-            _logger.LogWarning("User Entity not found");
-
-            _unitOfWork.Rollback();
-            _logger.LogDebug("User Get Transaction Rolledback");
-            
-            return DatabaseResult<UserEntity>.Error("User Entity not found", ErrorTypes.NotFound);
-        }
-
-        _unitOfWork.Commit();
-        _logger.LogDebug("User Get Transaction Committed");
-
-        _logger.LogInformation("User Entity found");
-        return DatabaseResult<UserEntity>.Success(entity);
-    }
-
-    public Task<DatabaseResult<IEnumerable<UserEntity>>> GetMany()
-    {
-        throw new NotImplementedException();
+        DatabaseResult<UserEntity> result = await _helper.QueryAsync(async () => {
+            string sql = _queryService.GetById;
+            return await _unitOfWork.Connection.QueryFirstOrDefaultAsync<UserEntity>(
+                sql,
+                new {Id = id},
+                _unitOfWork.Transaction
+            );
+        },
+            methodName,
+            _className
+        );
+        return result;
     }
 
     public async Task<DatabaseResult<UserEntity>> Update(UserEntity entity)
     {
-        _unitOfWork.Begin();
-        _logger.LogDebug("User Update Transaction Began");
+        string methodName = nameof(Update);
 
-        string sql = _userQueryService.UpdateById;
-
-        int rowsAffected = await _unitOfWork.Connection.ExecuteAsync(
-            sql,
-            entity,
-            _unitOfWork.Transaction
+        DatabaseResult<UserEntity> result = await _helper.ExecuteAsync<UserEntity>(async () => {
+            string sql = _queryService.UpdateById;
+            return await _unitOfWork.Connection.ExecuteAsync(
+                sql,
+                entity,
+                _unitOfWork.Transaction
+            );
+        },
+            methodName,
+            _className
         );
-
-        if (rowsAffected < 1){
-            _logger.LogWarning("No rows affected, Updates can not be made");
-
-            _unitOfWork.Rollback();
-            _logger.LogDebug("User Update Transaction Rolledback");
-
-            return DatabaseResult<UserEntity>.Error("No rows affected, Updates can not be made", ErrorTypes.CanNotMade, rowsAffected);
-        }
-
-        _unitOfWork.Commit();
-        _logger.LogDebug("User Update Transaction Committed");
-
-        _logger.LogInformation("User Update made successfully");
-        return DatabaseResult<UserEntity>.Success();
+        return result;
     }
 }

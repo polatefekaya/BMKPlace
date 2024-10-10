@@ -8,7 +8,9 @@ public enum ErrorTypes
     NotFound,
     NotMade,
     CanNotMade,
-    MutlipleInstances
+    MutlipleInstances,
+    Unexpected,
+    NullResult,
 }
 
 
