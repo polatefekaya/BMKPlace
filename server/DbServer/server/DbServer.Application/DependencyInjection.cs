@@ -21,7 +21,7 @@ public static class DependencyInjection
         services.AddScoped<IPixelQueryService, PixelQueryService>();
         
 
-        services.AddScoped<IMessageService, MessageService>();
+        services.AddSingleton<IMessageService, MessageService>();
         return services;
     }
 }

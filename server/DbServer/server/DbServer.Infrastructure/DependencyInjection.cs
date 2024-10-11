@@ -29,8 +29,8 @@ public static class DependencyInjection
         services.AddScoped<IPixelDbService, PixelDbService>();
         services.AddScoped<IUserDbService, UserDbService>();
 
-        services.AddScoped<IMessageConsumerFactory, MessageConsumerFactory>();
-
+        services.AddSingleton<IMessageConsumerFactory, MessageConsumerFactory>();
+        services.AddTransient<IMessageConsumer,RabbitMqConsumer>();
         return services;
     }
 }

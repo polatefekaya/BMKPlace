@@ -9,15 +9,16 @@ public class MessageConsumerFactory : IMessageConsumerFactory
 {
     private readonly IConnectionFactory _connectionFactory;
     private readonly ILogger<MessageConsumerFactory> _logger;
-    private readonly ILogger<RabbitMqConsumer> _rmqLogger;
-    public MessageConsumerFactory(IConnectionFactory connectionFactory, ILogger<MessageConsumerFactory> logger, ILogger<RabbitMqConsumer> rmqLogger){
+    private readonly IMessageConsumer _messageConsumer;
+
+    public MessageConsumerFactory(IConnectionFactory connectionFactory, ILogger<MessageConsumerFactory> logger, IMessageConsumer messageConsumer){
         _connectionFactory = connectionFactory;
         _logger = logger;
-        _rmqLogger = rmqLogger;
+        _messageConsumer = messageConsumer;
     }
     public IMessageConsumer Create(string queueName)
     {
         _logger.LogInformation("Creating new message consumer");
-        return new RabbitMqConsumer(_connectionFactory, _rmqLogger, queueName);
+        return _messageConsumer.Configure(queueName);
     }
 }

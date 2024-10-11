@@ -5,5 +5,5 @@ namespace DbServer.Application.Interfaces.Services.MessageQueue;
 
 public interface IMessageService
 {
-    public void Start(MessageServiceOptions? messageServiceOptions = null);
+    public Task Start();
 }

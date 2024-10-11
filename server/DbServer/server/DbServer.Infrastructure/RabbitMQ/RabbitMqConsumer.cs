@@ -10,13 +10,15 @@ public class RabbitMqConsumer : IMessageConsumer
 {
     private readonly IConnectionFactory _connectionFactory;
     private readonly ILogger<RabbitMqConsumer> _logger;
-    private readonly string _queueName;
-    public RabbitMqConsumer(IConnectionFactory connectionFactory, ILogger<RabbitMqConsumer> logger, string queueName){
+    private string _queueName;
+    public RabbitMqConsumer(IConnectionFactory connectionFactory, ILogger<RabbitMqConsumer> logger){
         _connectionFactory = connectionFactory;
-        _queueName = queueName;
         _logger = logger;
     }
-
+    public IMessageConsumer Configure(string queueName){
+        _queueName = queueName;
+        return this;
+    }
     public void Consume(Func<int> operation)
     {
         _logger.LogDebug("Connection creating");
