@@ -17,13 +17,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestServer.Application.Test
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestServer.Domain.Tests", "tests\RestServer.Domain.Tests\RestServer.Domain.Tests.csproj", "{1ED0EB45-6B4D-4FFB-AB51-1F6D6D91255A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "server", "server", "{E1B63B52-6243-40EC-8612-6056C2C913DF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestServer.Infrastructure", "server\RestServer.Infrastructure\RestServer.Infrastructure.csproj", "{674E8F0C-C394-4940-86DE-34F2B57FF636}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{7BE24694-A318-4236-B7EF-F1DDE7AE97F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -50,10 +51,21 @@ Global
 		{1ED0EB45-6B4D-4FFB-AB51-1F6D6D91255A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1ED0EB45-6B4D-4FFB-AB51-1F6D6D91255A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1ED0EB45-6B4D-4FFB-AB51-1F6D6D91255A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{674E8F0C-C394-4940-86DE-34F2B57FF636}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{674E8F0C-C394-4940-86DE-34F2B57FF636}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{674E8F0C-C394-4940-86DE-34F2B57FF636}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{674E8F0C-C394-4940-86DE-34F2B57FF636}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{6E1F632D-682D-4F4C-8F1A-6F0EE99E526F} = {280B61E3-7340-47BB-8312-91AAF1567D2F}
 		{80CD2B57-EEB9-438F-827D-53C66C2C5B7F} = {280B61E3-7340-47BB-8312-91AAF1567D2F}
 		{1ED0EB45-6B4D-4FFB-AB51-1F6D6D91255A} = {280B61E3-7340-47BB-8312-91AAF1567D2F}
+		{7BE24694-A318-4236-B7EF-F1DDE7AE97F2} = {E1B63B52-6243-40EC-8612-6056C2C913DF}
+		{557F9BCC-FC1C-49E5-848A-03EE3979FADE} = {E1B63B52-6243-40EC-8612-6056C2C913DF}
+		{F719E437-8E2B-49FC-83A2-4440A7B97A20} = {E1B63B52-6243-40EC-8612-6056C2C913DF}
+		{674E8F0C-C394-4940-86DE-34F2B57FF636} = {E1B63B52-6243-40EC-8612-6056C2C913DF}
 	EndGlobalSection
 EndGlobal
