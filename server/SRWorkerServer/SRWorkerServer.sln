@@ -17,13 +17,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SRWorkerServer.Domain.Tests
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SRWorkerServer.Web.Tests", "tests\SRWorkerServer.Web.Tests\SRWorkerServer.Web.Tests.csproj", "{E4A7D21F-5574-45AD-8843-A7F12FFAF657}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "server", "server", "{7B7556EF-E6D0-4FF1-9FE6-8F90A7BBC416}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SRWorkerServer.Infrastructure", "server\SRWorkerServer.Infrastructure\SRWorkerServer.Infrastructure.csproj", "{A2FD79CF-485B-4E90-AD08-C4E24C939569}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{52E10C84-9D0A-4ED2-A12B-CDE8D25B3F5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -50,10 +51,21 @@ Global
 		{E4A7D21F-5574-45AD-8843-A7F12FFAF657}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E4A7D21F-5574-45AD-8843-A7F12FFAF657}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E4A7D21F-5574-45AD-8843-A7F12FFAF657}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2FD79CF-485B-4E90-AD08-C4E24C939569}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2FD79CF-485B-4E90-AD08-C4E24C939569}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2FD79CF-485B-4E90-AD08-C4E24C939569}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2FD79CF-485B-4E90-AD08-C4E24C939569}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{BAA338F7-72AA-4001-BE62-43C76D4CC70B} = {6E8EBFBA-41D4-4369-A5B8-345021632EAA}
 		{06575608-804F-40F2-89BC-899044B6E443} = {6E8EBFBA-41D4-4369-A5B8-345021632EAA}
 		{E4A7D21F-5574-45AD-8843-A7F12FFAF657} = {6E8EBFBA-41D4-4369-A5B8-345021632EAA}
+		{52E10C84-9D0A-4ED2-A12B-CDE8D25B3F5A} = {7B7556EF-E6D0-4FF1-9FE6-8F90A7BBC416}
+		{54DE0D91-C0BD-4BDD-8677-81C8289B7C7B} = {7B7556EF-E6D0-4FF1-9FE6-8F90A7BBC416}
+		{0BA7B428-5D6E-45F4-9BE1-DEB4CF4833C8} = {7B7556EF-E6D0-4FF1-9FE6-8F90A7BBC416}
+		{A2FD79CF-485B-4E90-AD08-C4E24C939569} = {7B7556EF-E6D0-4FF1-9FE6-8F90A7BBC416}
 	EndGlobalSection
 EndGlobal
