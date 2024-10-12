@@ -25,7 +25,7 @@ namespace RestServer.Api.Controllers.v1
         [HttpPost]
         public async Task<IActionResult> Add([FromBody]UserEntity entity){
             _logger.LogInformation("UserController Add is started");
-            _messageClient.SendMessage<UserEntity>(entity, $"{_className}-{nameof(Add)}");
+            _messageClient.SendMessage<UserEntity, UserEntity>(entity, $"{_className}-{nameof(Add)}");
             return Ok();
         }
 
