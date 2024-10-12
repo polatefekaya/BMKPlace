@@ -33,13 +33,13 @@ public class CanvasController : CustomControllerBase
 
     [HttpPost]
     public async Task<IActionResult> Add([FromBody]CanvasEntity entity){
-        _logger.LogInformation("Trying of a message client");
-        _messageClient.SendMessage<CanvasEntity>(entity);
+        _messageClient.SendMessage<CanvasEntity>(entity, "canvas-add");
         return Ok();
     }
 
     [HttpDelete]
     public async Task<IActionResult> Delete(){
+        
         return Ok();
     }
 
