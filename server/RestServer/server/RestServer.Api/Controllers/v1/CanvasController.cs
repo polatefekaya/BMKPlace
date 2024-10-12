@@ -32,7 +32,7 @@ public class CanvasController : CustomControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<CanvasEntity>>> GetByUser(int userId){
         return await _helper.Run(async () => 
-            await _requestService.PublishRPC<IEnumerable<CanvasEntity>, int>(userId, "canvas-get", true)
+            await _requestService.PublishRPC<IEnumerable<CanvasEntity>, int>(userId, "canvas-getbyuserid", true)
         );
     }
 
@@ -45,24 +45,29 @@ public class CanvasController : CustomControllerBase
 
     [HttpPost]
     public async Task<IActionResult> Add([FromBody]CanvasEntity entity){
-        _requestService.Publish<CanvasEntity, CanvasEntity>(entity, "canvas-add");
-        return Ok();
+        return await _helper.Run(() => {
+             _requestService.Publish<CanvasEntity, CanvasEntity>(entity, "canvas-add");
+        });
     }
 
     [HttpDelete]
-    public async Task<IActionResult> Delete(){
-        
-        return Ok();
+    public async Task<IActionResult> Delete(int id){
+        return await _helper.Run(() => {
+             _requestService.Publish<CanvasEntity, int>(id, "canvas-delete");
+        });
     }
 
     [HttpDelete]
-    public async Task<IActionResult> DeleteByUser(){
-        return Ok();
+    public async Task<IActionResult> DeleteByUser(int userId){
+        return await _helper.Run(() => {
+             _requestService.Publish<CanvasEntity, int>(userId, "canvas-deletebyuserid");
+        });
     }
 
     [HttpPut]
-    public async Task<IActionResult> Update(){
-        return Ok();
+    public async Task<IActionResult> Update([FromBody]CanvasEntity entity){
+        return await _helper.Run(() => {
+             _requestService.Publish<CanvasEntity, CanvasEntity>(entity, "canvas-update");
+        });
     }
-
 }

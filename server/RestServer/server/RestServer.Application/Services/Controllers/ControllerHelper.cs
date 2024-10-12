@@ -32,4 +32,19 @@ public class ControllerHelper : ControllerBase
             return StatusCode(500, "An unexpected error occurred");
         }
     }
+    public async Task<IActionResult> Run(Action operation)
+    {
+        _logger.LogDebug("Operation is started");
+        try{
+            operation.Invoke();
+            return Ok();
+        }
+        catch(ArgumentNullException){
+            return StatusCode(500, "Null return");
+        }
+        catch(Exception ex){
+            _logger.LogError(ex, "An unexpected error occurred");
+            return StatusCode(500, "An unexpected error occurred");
+        }
+    }
 }

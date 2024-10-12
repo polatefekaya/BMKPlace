@@ -14,14 +14,12 @@ public class RequestService : IRequestService
     private ILogger<RequestService> _logger;
     private readonly IMessageClient _messageClient;
     private readonly IChannelManagerService _chManager;
-    private readonly IConfiguration _configuration;
     private readonly double _timeout;
 
     public RequestService(ILogger<RequestService> logger, IMessageClient messageClient, IChannelManagerService chManager, IConfiguration configuration){
         _logger = logger;
         _messageClient = messageClient;
         _chManager = chManager;
-        _configuration = configuration;
 
         _timeout = Convert.ToDouble(configuration["ClientSettings:RequestTimeout"]);
     }
@@ -33,6 +31,7 @@ public class RequestService : IRequestService
 
     public async Task<T> PublishRPC<T,TMessage>(TMessage entity, string queue, bool channelPerCall)
     {
+        _logger.LogInformation("RPC publish is started");
         Channel<byte[]>? ch = _chManager.Get(createNew: true);
         if (ch is null){
             _logger.LogError("Could not create internal channel for that request");
