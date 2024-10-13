@@ -7,15 +7,15 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 export default function TopNavigation (){
     return(
         <>
-    <Navbar variant="body" expand="lg" className="bg-body-tertiary">
+    <Navbar variant="body" expand="lg" className="bg-body-tertiary" style={{marginLeft: 0, paddingLeft: 0}}>
       <Container>
         <Navbar.Brand href="#home">BMK Place</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
-            <Nav.Link href="#home">Home</Nav.Link>
-            <Nav.Link href="#link">Link</Nav.Link>
-            <NavDropdown title="Dropdown" id="basic-nav-dropdown">
+            <Nav.Link href="/">Home</Nav.Link>
+            <Nav.Link href="canvases">Canvases</Nav.Link>
+            {/* <NavDropdown title="Settings" id="basic-nav-dropdown">
               <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
               <NavDropdown.Item href="#action/3.2">
                 Another action
@@ -25,7 +25,7 @@ export default function TopNavigation (){
               <NavDropdown.Item href="#action/3.4">
                 Separated link
               </NavDropdown.Item>
-            </NavDropdown>
+            </NavDropdown> */}
           </Nav>
         </Navbar.Collapse>
       </Container>
