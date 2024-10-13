@@ -1,51 +1,27 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { FixedSizeGrid as Grid } from 'react-window';
-import { useGesture } from '@use-gesture/react';
-import { useSpring, animated } from 'react-spring';
+import React, { useState, useRef, useEffect } from 'react';
 import ColorPalette from '../components/colorPalette';
 import '../styles/Canvas.css';
 
-const GRID_SIZE = 100;
-const CELL_SIZE = 20;
+const GRID_SIZE = 100; // 100x100 grid
+const CELL_SIZE = 20;  // Each pixel is 20x20px
 
 function Canvas({ colors }) {
   const [pixels, setPixels] = useState(Array(GRID_SIZE * GRID_SIZE).fill('#FFFFFF'));
   const [selectedColor, setSelectedColor] = useState('#000000');
   const [showPopup, setShowPopup] = useState(false);
   const [clickedPixel, setClickedPixel] = useState(null);
+  const canvasRef = useRef(null); // Reference to the canvas element
+  const isDragging = useRef(false); // Track if dragging is happening
+  const lastPos = useRef({ x: 0, y: 0 }); // Track the last cursor position
 
-  const [{ x, y, scale }, api] = useSpring(() => ({ x: 0, y: 0, scale: 1 }));
-  const canvasRef = useRef(null);
-
-  // Dynamically calculate the canvas size based on window dimensions.
-  const [canvasHeight, setCanvasHeight] = useState(window.innerHeight - 120);
-
-  const updateCanvasSize = useCallback(() => {
-    setCanvasHeight(window.innerHeight - 120); // Subtract space for palette and navbar
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener('resize', updateCanvasSize);
-    return () => window.removeEventListener('resize', updateCanvasSize);
-  }, [updateCanvasSize]);
-
-  // Handle pinch-to-zoom and pan gestures.
-  const bind = useGesture({
-    onDrag: ({ offset: [ox, oy] }) => api.start({ x: ox, y: oy }),
-    onPinch: ({ offset: [s] }) => api.start({ scale: s }),
-    onWheel: ({ ctrlKey, delta: [, dy] }) => {
-      if (ctrlKey) {
-        const newScale = Math.min(Math.max(scale.get() - dy * 0.001, 0.5), 3);
-        api.start({ scale: newScale });
-      }
-    },
-  });
-
-  const handlePixelClick = (rowIndex, colIndex) => {
-    setClickedPixel({ row: rowIndex, col: colIndex });
+  // Handle pixel click only if not dragging
+  const handlePixelClick = (row, col) => {
+    if (isDragging.current) return; // Prevent clicks while dragging
+    setClickedPixel({ row, col });
     setShowPopup(true);
   };
 
+  // Place a pixel and update the state
   const placePixel = () => {
     const { row, col } = clickedPixel;
     const index = row * GRID_SIZE + col;
@@ -55,42 +31,67 @@ function Canvas({ colors }) {
     setShowPopup(false);
   };
 
-  const Cell = ({ columnIndex, rowIndex, style }) => {
-    const index = rowIndex * GRID_SIZE + columnIndex;
-    return (
-      <div
-        className="pixel-cell"
-        style={{ ...style, backgroundColor: pixels[index] }}
-        onClick={() => handlePixelClick(rowIndex, columnIndex)}
-      />
-    );
+  // Start panning
+  const startPan = (e) => {
+    isDragging.current = true;
+    const { clientX, clientY } = e.touches ? e.touches[0] : e;
+    lastPos.current = { x: clientX, y: clientY };
+  };
+
+  // Handle the panning movement
+  const panCanvas = (e) => {
+    if (!isDragging.current) return;
+    const { clientX, clientY } = e.touches ? e.touches[0] : e;
+
+    const deltaX = clientX - lastPos.current.x;
+    const deltaY = clientY - lastPos.current.y;
+
+    lastPos.current = { x: clientX, y: clientY };
+
+    const canvas = canvasRef.current;
+    const style = window.getComputedStyle(canvas);
+    const matrix = new DOMMatrixReadOnly(style.transform);
+
+    canvas.style.transform = `translate(${matrix.m41 + deltaX}px, ${matrix.m42 + deltaY}px)`;
+  };
+
+  // Stop panning
+  const endPan = () => {
+    isDragging.current = false;
   };
 
   return (
-    <div className="canvas-container">
-      <animated.div
-        {...bind()}
+    <div
+      className="canvas-container"
+      onMouseDown={startPan}
+      onMouseMove={panCanvas}
+      onMouseUp={endPan}
+      onTouchStart={startPan}
+      onTouchMove={panCanvas}
+      onTouchEnd={endPan}
+    >
+      <div
+        ref={canvasRef}
+        className="pixel-grid"
         style={{
-          x,
-          y,
-          scale,
           width: GRID_SIZE * CELL_SIZE,
           height: GRID_SIZE * CELL_SIZE,
-          touchAction: 'none', // Prevent default touch scrolling
+          transform: 'translate(0px, 0px)',
         }}
       >
-        <Grid
-          ref={canvasRef}
-          columnCount={GRID_SIZE}
-          rowCount={GRID_SIZE}
-          columnWidth={CELL_SIZE}
-          rowHeight={CELL_SIZE}
-          width={window.innerWidth}
-          height={canvasHeight}
-        >
-          {Cell}
-        </Grid>
-      </animated.div>
+        {pixels.map((color, index) => {
+          const row = Math.floor(index / GRID_SIZE);
+          const col = index % GRID_SIZE;
+          return (
+            <div
+              key={index}
+              className="pixel"
+              style={{ backgroundColor: color }}
+              onClick={() => handlePixelClick(row, col)}
+            />
+          );
+        })}
+      </div>
 
       <ColorPalette
         colors={colors}
