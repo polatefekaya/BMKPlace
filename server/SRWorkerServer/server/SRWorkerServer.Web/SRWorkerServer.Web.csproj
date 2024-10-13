@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SRWorkerServer.Application\SRWorkerServer.Application.csproj" />
+    <ProjectReference Include="..\SRWorkerServer.Domain\SRWorkerServer.Domain.csproj" />
   </ItemGroup>
 
 </Project>

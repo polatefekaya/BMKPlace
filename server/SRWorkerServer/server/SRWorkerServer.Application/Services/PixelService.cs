@@ -20,18 +20,24 @@ public class PixelService : IPixelService
     }
 
 
-    public Task AddPixelAsync(PixelAddDto dto)
+    public async Task AddPixelAsync(PixelAddDto dto)
     {
-        throw new NotImplementedException();
+        _logger.LogDebug("Pixel Adding is started.");
+        _messageBroker.PublishMessage<PixelAddDto, PixelAddDto>(dto, "c");
+        await _realtime.BroadcastMessage<PixelAddDto>(dto);
     }
 
-    public Task GetAllPixelsByCanvas(PixelGetAllByCanvasRequestDto rdto)
+    public async Task GetAllPixelsByCanvas(PixelGetAllByCanvasRequestDto dto)
     {
-        throw new NotImplementedException();
+        _logger.LogDebug("Pixel GetAllPixelsByCanvas is started.");
+        _messageBroker.PublishMessage<PixelGetAllByCanvasRequestDto, PixelGetAllByCanvasRequestDto>(dto, "c");
+        await _realtime.BroadcastMessage<PixelGetAllByCanvasRequestDto>(dto);
     }
 
-    public Task GetByPosition(PixelGetByPositionDto dto)
+    public async Task GetByPosition(PixelGetByPositionDto dto)
     {
-        throw new NotImplementedException();
+        _logger.LogDebug("Pixel GetByPosition is started.");
+        _messageBroker.PublishMessage<PixelGetByPositionDto, PixelGetByPositionDto>(dto, "c");
+        await _realtime.BroadcastMessage<PixelGetByPositionDto>(dto);
     }
 }

@@ -1,6 +1,8 @@
 using System;
 using Microsoft.AspNetCore.SignalR;
 using SRWorkerServer.Application.Interfaces;
+using SRWorkerServer.Domain.Data.DTO;
+using SRWorkerServer.Domain.Data.DTO.Request;
 
 namespace SRWorkerServer.Web;
 
@@ -14,17 +16,17 @@ public class PixelHub : Hub
         _pixelService = pixelService;
     }
 
-    public async Task AddPixel(){
-        await _pixelService.AddPixelAsync();
+    public async Task AddPixel(PixelAddDto dto){
+        await _pixelService.AddPixelAsync(dto);
     }
 
-    public async Task GetPixelByPosition(){
-        await _pixelService.GetByPosition();
+    public async Task GetPixelByPosition(PixelGetByPositionDto dto){
+        await _pixelService.GetByPosition(dto);
     }
 
     //client calls this when first login
-    public async Task GetPixelsByCanvas(){
-        await _pixelService.GetAllPixelsByCanvas();
+    public async Task GetPixelsByCanvas(PixelGetAllByCanvasRequestDto dto){
+        await _pixelService.GetAllPixelsByCanvas(dto);
     }
 
     
