@@ -7,6 +7,10 @@
   touch-action: none; /* Disable native gestures */
   user-select: none; /* Prevent text selection during drag */
 }
+.canvas {
+  border-width: 20;
+  border-color: black;
+}
 
 .pixel-grid {
   position: absolute;
