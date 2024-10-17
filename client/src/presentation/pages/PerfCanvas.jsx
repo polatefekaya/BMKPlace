@@ -6,8 +6,8 @@ export default function CanvasGrid() {
   const canvasRef = useRef(null);
 
   // Grid parameters
-  const gridSize = 400;
-  const cellSize = 20; // Adjusted to keep the canvas size manageable
+  const gridSize = 200;
+  const cellSize = 50; // Adjusted to keep the canvas size manageable
 
   // Colors array
   const COLORS = [
@@ -83,73 +83,94 @@ export default function CanvasGrid() {
     canvas.width = gridSize * cellSize;
     canvas.height = gridSize * cellSize;
 
+    // Set canvas display size
+    canvas.style.width = `${gridSize * cellSize}px`;
+    canvas.style.height = `${gridSize * cellSize}px`;
+
     // Draw the grid after initializing
     drawGrid();
   }, []); // Empty dependency array ensures this runs once on mount
 
   return (
-    <TransformWrapper
-      initialScale={1}
-      minScale={0.1}
-      maxScale={10}
-      centerOnInit={true}
-      wheel={{
-        wheelEnabled: true,
-        touchPadEnabled: true,
-        step: 0.1,
-      }}
-      pinch={{
-        disabled: false,
-      }}
-      panning={{
-        disabled: false,
-        velocityDisabled: true,
-      }}
-      doubleClick={{
-        disabled: true,
-      }}
-    >
-      {({ scale, positionX, positionY }) => {
-        // Define the onClick handler here, where `scale`, `positionX`, and `positionY` are accessible
-        const handleClick = (e) => {
-          const canvas = canvasRef.current;
-          const rect = canvas.getBoundingClientRect();
+    <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
+      <TransformWrapper
+        initialScale={0.5}
+        initialPositionX={0}
+        initialPositionY={0}
+        minScale={0.1}
+        maxScale={10}
+        centerOnInit={false}
+        wheel={{
+          wheelEnabled: true,
+          touchPadEnabled: true,
+          step: 0.1,
+        }}
+        pinch={{
+          disabled: false,
+        }}
+        panning={{
+          disabled: false,
+          velocityDisabled: true,
+        }}
+        doubleClick={{
+          disabled: true,
+        }}
+        alignmentAnimation={{
+          sizeX: 0,
+          sizeY: 0,
+        }}
+        limitToBounds={false} // Allow panning beyond the bounds
+      >
+        {({ scale, positionX, positionY }) => {
+          // Define the onClick handler here, where `scale`, `positionX`, and `positionY` are accessible
+          const handleClick = (e) => {
+            const canvas = canvasRef.current;
+            const rect = canvas.getBoundingClientRect();
 
-          // Adjust for transformations
-          const mouseX = (e.clientX - rect.left - positionX) / scale;
-          const mouseY = (e.clientY - rect.top - positionY) / scale;
+            // Adjust for transformations
+            const mouseX = (e.clientX - rect.left - positionX) / scale;
+            const mouseY = (e.clientY - rect.top - positionY) / scale;
 
-          const cellX = Math.floor(mouseX / cellSize);
-          const cellY = Math.floor(mouseY / cellSize);
+            const cellX = Math.floor(mouseX / cellSize);
+            const cellY = Math.floor(mouseY / cellSize);
 
-          if (
-            cellX >= 0 &&
-            cellX < gridSize &&
-            cellY >= 0 &&
-            cellY < gridSize
-          ) {
-            // Assign a new random color index to the cell
-            cells.current[cellX][cellY] = Math.floor(Math.random() * COLORS.length);
-            drawGrid(); // Redraw the grid to reflect changes
-          }
-        };
+            if (
+              cellX >= 0 &&
+              cellX < gridSize &&
+              cellY >= 0 &&
+              cellY < gridSize
+            ) {
+              // Assign a new random color index to the cell
+              cells.current[cellX][cellY] = Math.floor(Math.random() * COLORS.length);
+              drawGrid(); // Redraw the grid to reflect changes
+            }
+          };
 
-        return (
-          <TransformComponent
-            wrapperStyle={{
-              width: '100%',
-              height: '100%',
-              touchAction: 'none', // Prevent default touch actions
-            }}
-          >
-            <canvas
-              ref={canvasRef}
-              style={{ border: '1px solid black', display: 'block' }}
-              onClick={handleClick} // Pass the handler here
-            />
-          </TransformComponent>
-        );
-      }}
-    </TransformWrapper>
+          return (
+            <TransformComponent
+              wrapperStyle={{
+                width: '100%',
+                height: '100%',
+                touchAction: 'none', // Prevent default touch actions
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <canvas
+                ref={canvasRef}
+                style={{
+                  border: '1px solid black',
+                  display: 'block',
+                  width: `${gridSize * cellSize}px`,
+                  height: `${gridSize * cellSize}px`,
+                }}
+                onClick={handleClick} // Pass the handler here
+              />
+            </TransformComponent>
+          );
+        }}
+      </TransformWrapper>
+    </div>
   );
 }
