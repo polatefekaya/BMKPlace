@@ -20,6 +20,10 @@ public class PixelHub : Hub
         _logger.LogInformation("connected" + message);
     }
 
+    public async Task SendPixelUpdate(SendPixelUpdateDto dto){
+        _logger.LogInformation("Send Pixel Update\nx: {x}, y: {y}, colorIndex: {colorIndex}", dto.x, dto.y, dto.colorIndex);
+    }
+
     // public async Task AddPixel(PixelAddDto dto){
     //     await _pixelService.AddPixelAsync(dto);
     // }

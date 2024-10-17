@@ -133,18 +133,37 @@ export default function RTCanvas() {
     signalRService.invoke('SendPixelUpdate', { x, y, colorIndex });
   };
 
-  const handleClick = (e) => {
+  const handleClick = (e, { scale, positionX, positionY }) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    console.log(`Transformations: positionX=${positionX}, positionY=${positionY}, scale=${scale}`);
+
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
 
+    // Get mouse position relative to canvas
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
     // Adjust for transformations
-    const { scale, positionX, positionY } = e.transformState;
+    const contentX = (x - positionX) / scale;
+    const contentY = (y - positionY) / scale;
 
-    const mouseX = (e.clientX - rect.left - positionX) / scale;
-    const mouseY = (e.clientY - rect.top - positionY) / scale;
+    // Alternative adjustment if the above doesn't work:
+    // const contentX = (x + positionX) / scale;
+    // const contentY = (y + positionY) / scale;
 
-    const cellX = Math.floor(mouseX / cellSize);
-    const cellY = Math.floor(mouseY / cellSize);
+    // Calculate grid cell indices
+    const cellX = Math.floor(contentX / cellSize);
+    const cellY = Math.floor(contentY / cellSize);
+
+    console.log(`Clicked cell: (${cellX}, ${cellY})`);
+    console.log(`Mouse screen position: (${e.clientX}, ${e.clientY})`);
+    console.log(`Canvas position: (${rect.left}, ${rect.top})`);
+    console.log(`Mouse canvas position: (${x}, ${y})`);
+    console.log(`Content coordinates: (${contentX}, ${contentY})`);
+    console.log(`Grid cell indices: (${cellX}, ${cellY})`);
 
     if (
       cellX >= 0 &&
@@ -157,6 +176,7 @@ export default function RTCanvas() {
       sendPixelUpdate(cellX, cellY, selectedColorIndex);
     }
   };
+  
 
   return (
     <div style={{ width: width, height: height, overflow: 'hidden' }}>
@@ -188,7 +208,7 @@ export default function RTCanvas() {
         }}
         limitToBounds={false}
       >
-        {({ scale, positionX, positionY }) => (
+        {({ scale, positionX, positionY, ...rest }) => (
           <TransformComponent
             wrapperStyle={{
               width: '100%',
@@ -208,10 +228,10 @@ export default function RTCanvas() {
                 height: `${gridSize * cellSize}px`,
               }}
               onClick={(e) =>
-                handleClick({
-                  ...e,
-                  transformState: { scale, positionX, positionY },
-                })
+                handleClick(
+                  e,
+                  { scale, positionX, positionY },
+                )
               }
             />
           </TransformComponent>
