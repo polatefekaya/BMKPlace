@@ -9,25 +9,29 @@ namespace SRWorkerServer.Web;
 public class PixelHub : Hub
 {
     private ILogger<PixelHub> _logger;
-    private readonly IPixelService _pixelService;
+    //private readonly IPixelService _pixelService;
 
-    public PixelHub(ILogger<PixelHub> logger, IPixelService pixelService){
+    public PixelHub(ILogger<PixelHub> logger){
         _logger = logger;
-        _pixelService = pixelService;
+        //_pixelService = pixelService;
     }
 
-    public async Task AddPixel(PixelAddDto dto){
-        await _pixelService.AddPixelAsync(dto);
+    public async Task OnConnectedAsync(string message){
+        _logger.LogInformation("connected" + message);
     }
 
-    public async Task GetPixelByPosition(PixelGetByPositionDto dto){
-        await _pixelService.GetByPosition(dto);
-    }
+    // public async Task AddPixel(PixelAddDto dto){
+    //     await _pixelService.AddPixelAsync(dto);
+    // }
 
-    //client calls this when first login
-    public async Task GetPixelsByCanvas(PixelGetAllByCanvasRequestDto dto){
-        await _pixelService.GetAllPixelsByCanvas(dto);
-    }
+    // public async Task GetPixelByPosition(PixelGetByPositionDto dto){
+    //     await _pixelService.GetByPosition(dto);
+    // }
+
+    // //client calls this when first login
+    // public async Task GetPixelsByCanvas(PixelGetAllByCanvasRequestDto dto){
+    //     await _pixelService.GetAllPixelsByCanvas(dto);
+    // }
 
     
 }

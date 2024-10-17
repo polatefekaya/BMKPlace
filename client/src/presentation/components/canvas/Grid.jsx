@@ -1,5 +1,5 @@
 // Grid.jsx
-import { PixelModel } from "../../domain/models/pixelModel";
+import { PixelModel } from "../../../domain/models/pixelModel";
 import style from "../../styles/canvas/Grid.module.css";
 import Pixel from "./Pixel";
 

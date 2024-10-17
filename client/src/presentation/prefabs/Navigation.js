@@ -4,7 +4,7 @@ import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
-import { RootContext } from '../domain/context/RootContextProvider';
+import { RootContext } from '../../domain/context/RootContextProvider';
 
 export default function TopNavigation (){
   const context = useContext(RootContext);

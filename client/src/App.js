@@ -8,8 +8,9 @@ import Canvases from './presentation/pages/Canvases';
 import NewCanvas from './presentation/pages/NewCanvas';
 import TopNavigation from './presentation/prefabs/Navigation';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
-import RootContextProvider from './presentation/domain/context/RootContextProvider';
+import RootContextProvider from './domain/context/RootContextProvider';
 import PerfCanvas from './presentation/pages/PerfCanvas';
+import RTCanvas from './presentation/pages/RTCanvas';
 
 function App() {
   return (
@@ -20,7 +21,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Landing/>} />
           <Route path="/canvases" element={<Canvases />} />
-          <Route path="/canvas/:id" element={<PerfCanvas />} />
+          <Route path="/canvas/:id" element={<RTCanvas />} />
         </Routes>
       </Router>
     </RootContextProvider>

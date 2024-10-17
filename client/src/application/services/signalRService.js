@@ -8,7 +8,10 @@ class SignalRService {
 
   async startConnection() {
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl('https://your-backend-url/your-hub-endpoint')
+      .withUrl('http://localhost:5124/pixelHub', {
+        withCredentials: true,
+      })
+      .configureLogging(signalR.LogLevel.Trace)
       .withAutomaticReconnect()
       .build();
 
@@ -16,8 +19,13 @@ class SignalRService {
       console.log('Reconnected to SignalR hub.');
     });
 
+   
+
     try {
       await this.connection.start();
+      if(this.connection){
+          this.connection.invoke("OnConnectedAsync", "nbr");
+      }
       console.log('SignalR Connected.');
     } catch (err) {
       console.error('Error establishing SignalR connection:', err);
