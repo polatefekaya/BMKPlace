@@ -6,13 +6,15 @@ import Grid from "../components/canvas/Grid";
 import ColorPalette from "../components/colorPalette";
 import style from "../styles/canvas/Canvas.module.css";
 
-const horizontalBlockCount = 20;
-const verticalBlockCount = 20;
-const pixelSize = 20;
+const horizontalBlockCount = 100;
+const verticalBlockCount = 100;
+const pixelSize = 10;
+
+const BORDER_SIZE = 2;
 
 export default function NewCanvas() {
-  const gridWidth = horizontalBlockCount * pixelSize;
-  const gridHeight = verticalBlockCount * pixelSize;
+  const gridWidth = (horizontalBlockCount * pixelSize) + BORDER_SIZE * 2;
+  const gridHeight = (verticalBlockCount * pixelSize) + BORDER_SIZE * 2;
 
   return (
     <>
@@ -29,8 +31,8 @@ export default function NewCanvas() {
         >
           <TransformWrapper
             initialScale={1}
-            minScale={0.5}
-            maxScale={3}
+            minScale={0.1}
+            maxScale={5}
             centerOnInit={true}
             wheel={{
               step: 0.1,
@@ -87,10 +89,12 @@ export default function NewCanvas() {
                       height: gridHeight,
                     }}
                   >
+                    <h6 className={style.header}>BMK PLACE</h6>
                     <Grid
                       horizontalBlockCount={horizontalBlockCount}
                       verticalBlockCount={verticalBlockCount}
                       pixelSize={pixelSize}
+                      borderSize={BORDER_SIZE}
                     />
                   </div>
                 </TransformComponent>

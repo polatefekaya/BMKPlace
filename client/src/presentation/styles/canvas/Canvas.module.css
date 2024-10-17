@@ -13,3 +13,12 @@
      touch-action: none;
 
 }
+
+.header{
+    font-family: "press-start";
+}
+
+@font-face {
+    font-family: "press-start";
+    src: url("../../../../public/PressStart2P-Regular.ttf") format("truetype");
+}
