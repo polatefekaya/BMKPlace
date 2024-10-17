@@ -8,7 +8,7 @@
 }
 
 .canvasContainer {
-     border: 10px solid black;
+     border: 1px solid black;
      overflow: hidden;
      touch-action: none;
 
