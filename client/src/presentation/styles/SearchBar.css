@@ -1,0 +1,98 @@
+/* Main Container */
+.search-bar-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 10px 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    flex-wrap: wrap; /* Allow elements to wrap on smaller screens */
+    gap: 10px;
+  }
+  
+  /* Search Input Wrapper */
+  .search-input-wrapper {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    margin-right: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: white;
+    min-width: 250px; /* Prevent it from becoming too small */
+  }
+  
+  /* Search Icon */
+  .search-icon {
+    color: #6c757d;
+    margin-left: 10px;
+    font-size: 1.2rem;
+  }
+  
+  /* Search Input */
+  .search-input {
+    border: none;
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+  }
+  
+  .search-input:focus {
+    outline: none;
+    box-shadow: none;
+  }
+  
+  /* Dropdown Wrapper */
+  .dropdown-wrapper {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap; /* Ensure dropdowns wrap if needed */
+    gap: 10px; /* Add space between dropdowns */
+  }
+  
+  /* Dropdown Button */
+  .dropdown-btn {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    background-color: white;
+    color: #495057;
+    width: 150px; /* Set a fixed width for consistency */
+  }
+  
+  .dropdown-btn:hover {
+    background-color: #e9ecef;
+  }
+  
+  /* Dropdown Menu */
+  .dropdown-menu {
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .search-bar-container {
+      flex-direction: column; /* Stack elements vertically on mobile */
+      align-items: stretch; /* Align elements to fill the width */
+    }
+  
+    .search-input-wrapper {
+      margin-right: 0; /* Remove margin on mobile */
+    }
+  
+    .dropdown-wrapper {
+      width: 100%; /* Ensure dropdowns take full width */
+      justify-content: space-between; /* Distribute dropdowns evenly */
+    }
+  
+    .dropdown-btn {
+      flex: 1; /* Allow buttons to stretch */
+      width: auto; /* Remove fixed width on mobile */
+    }
+  }
+  

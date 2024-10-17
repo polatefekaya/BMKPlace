@@ -6,6 +6,8 @@
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.35" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
     <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
   </ItemGroup>

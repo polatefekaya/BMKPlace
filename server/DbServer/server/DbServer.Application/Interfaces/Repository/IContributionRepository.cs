@@ -1,20 +1,21 @@
 using System;
 using DbServer.Domain.Data.Entities;
+using DbServer.Domain.Data.Results;
 
 namespace DbServer.Application.Interfaces.Repository;
 
 public interface IContributionRepository
 {
-    public Task<ContributionEntity> Get();
-    public Task<ContributionEntity> Add();
-    public Task<ContributionEntity> Delete();
-    public Task<ContributionEntity[]> GetMany();
-    public Task<ContributionEntity[]> DeleteMany();
-    public Task<ContributionEntity> GetByPosition();
-    public Task<ContributionEntity[]> GetManyByUserId();
-    public Task<ContributionEntity[]> GetManyByCanvasId();
-    public Task<ContributionEntity[]> GetManyByPixelId();
-    public Task<ContributionEntity[]> DeleteManyByUserId();
-    public Task<ContributionEntity[]> DeleteManyByCanvasId();
-    public Task<ContributionEntity[]> DeleteManyByPixelId();
+    public Task<DatabaseResult<ContributionEntity>> Get(int id);
+    public Task<DatabaseResult<ContributionEntity>> Add(ContributionEntity entity);
+    public Task<DatabaseResult<ContributionEntity>> Delete(int id);
+    public Task<DatabaseResult<ContributionEntity>> GetByPositionWithCanvasId(string position, int canvasId);
+    public Task<DatabaseResult<IEnumerable<ContributionEntity>>> GetManyByUserId(int userId);
+    public Task<DatabaseResult<IEnumerable<ContributionEntity>>> GetManyByCanvasId(int canvasId);
+    public Task<DatabaseResult<IEnumerable<ContributionEntity>>> GetManyByPixelId(int pixelId);
+    public Task<DatabaseResult<IEnumerable<ContributionEntity>>> DeleteManyByUserId(int userId);
+    public Task<DatabaseResult<IEnumerable<ContributionEntity>>> DeleteManyByCanvasId(int canvasId);
+    public Task<DatabaseResult<IEnumerable<ContributionEntity>>> DeleteManyByPixelId(int pixelId);
+    public Task<DatabaseResult<ContributionEntity>> DeleteByPositionWithCanvasId(string position, int canvasId);
 }
+

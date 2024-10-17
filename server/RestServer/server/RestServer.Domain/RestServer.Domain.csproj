@@ -6,4 +6,13 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\DTO\" />
+    <Folder Include="Data\Models\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MessagePack" Version="2.5.172" />
+  </ItemGroup>
+
 </Project>

@@ -2,19 +2,21 @@ using System;
 using System.Data;
 using System.Data.SqlClient;
 using DbServer.Application.Interfaces.UnitOfWork;
+using DbServer.Domain.Data.Options;
+using Microsoft.Extensions.Options;
 
 namespace DbServer.Infrastructure;
 
 public class UnitOfWork: IUnitOfWork
 {
-    private readonly string _connectionString;
+    private readonly string? _connectionString;
     private IDbConnection _connection;
     private IDbTransaction _transaction;
     private bool _disposed;
 
-    public UnitOfWork(string connectionString)
+    public UnitOfWork(IOptions<DatabaseSettings> options)
     {
-        _connectionString = connectionString;
+        _connectionString = options.Value.ConnectionString;
     }
 
     public IDbConnection Connection

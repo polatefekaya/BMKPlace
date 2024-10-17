@@ -1,17 +1,16 @@
 using System;
+using DbServer.Application.Interfaces.Repository;
 using DbServer.Domain.Data.Entities;
+using DbServer.Domain.Data.Results;
 
 namespace DbServer.Application.Interfaces.Services.Database;
 
-public interface IPixelDbService
+public interface IPixelDbService : IPixelRepository
 {
-    public Task<PixelEntity[]> GetManyByCanvasId();
-    public Task<PixelEntity[]> GetManyByUserId();
-    public Task<PixelEntity[]> DeleteManyByUserId();
-    public Task<PixelEntity[]> DeleteManyByCanvasId();
-    public Task<PixelEntity> Add();
-    public Task<PixelEntity[]> DeleteManyByDate();
-    public Task<PixelEntity> Delete();
-    public Task<PixelEntity[]> DeleteManyByColor();
-    
+    // public Task<DatabaseResult<IEnumerable<PixelEntity>>> GetManyByCanvasId();
+    // public Task<DatabaseResult<IEnumerable<PixelEntity>>> GetManyByUserId();
+    // public Task<DatabaseResult<IEnumerable<PixelEntity>>> DeleteManyByUserId();
+    // public Task<DatabaseResult<IEnumerable<PixelEntity>>> DeleteManyByCanvasId();
+    // public Task<DatabaseResult<PixelEntity>> GetByPosition(string position, int canvasId);
+
 }

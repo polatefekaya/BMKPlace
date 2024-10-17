@@ -1,14 +1,13 @@
 using System;
 using DbServer.Domain.Data.Entities;
+using DbServer.Domain.Data.Results;
 
 namespace DbServer.Application.Interfaces.Repository;
 
 public interface IUserRepository
 {
-    public Task<UserEntity> Get();
-    public Task<UserEntity> Add();
-    public Task<UserEntity> Delete();
-    public Task<UserEntity> Update();
-    public Task<UserEntity[]> GetMany();
-    public Task<UserEntity[]> DeleteMany();
+    public Task<DatabaseResult<UserEntity>> Get(int id);
+    public Task<DatabaseResult<UserEntity>> Add(UserEntity entity);
+    public Task<DatabaseResult<UserEntity>> Delete(int id);
+    public Task<DatabaseResult<UserEntity>> Update(UserEntity entity);
 }

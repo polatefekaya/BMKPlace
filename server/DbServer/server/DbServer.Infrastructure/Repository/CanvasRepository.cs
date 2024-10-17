@@ -1,45 +1,102 @@
 using System;
+using Dapper;
+using DbServer.Application.Interfaces.Factories.Database;
 using DbServer.Application.Interfaces.Repository;
+using DbServer.Application.Interfaces.Services.Database.SqlQuery;
 using DbServer.Application.Interfaces.UnitOfWork;
 using DbServer.Domain.Data.Entities;
+using DbServer.Domain.Data.Models.Errors;
+using DbServer.Domain.Data.Results;
+using Microsoft.Extensions.Logging;
 
 namespace DbServer.Infrastructure.Repository;
 
 public class CanvasRepository : ICanvasRepository
 {
     private readonly IUnitOfWork _unitOfWork;
-
-    public CanvasRepository(IUnitOfWork unitOfWork){
+    private readonly ICanvasQueryService _queryService;
+    private readonly ILogger<CanvasRepository> _logger;
+    private readonly IRepositoryHelper _helper;
+    private readonly string _className;
+    public CanvasRepository(ILogger<CanvasRepository> logger, IUnitOfWork unitOfWork, ISqlQueryServiceFactory sqlServiceFactory, IRepositoryHelper helper)
+    {
         _unitOfWork = unitOfWork;
+        _queryService = sqlServiceFactory.Create().CanvasQueryService();
+        _logger = logger;
+
+        _helper = helper;
+        _className = this.GetType().Name;
     }
 
-    public Task<CanvasEntity> Add()
+    public async Task<DatabaseResult<CanvasEntity>> Add(CanvasEntity entity)
     {
-        throw new NotImplementedException();
+        string methodName = nameof(Add);
+
+        DatabaseResult<CanvasEntity> result = await _helper.ExecuteAsync<CanvasEntity>(async () => {
+            string sql = _queryService.Add;
+            return await _unitOfWork.Connection.ExecuteAsync(
+                sql,
+                entity,
+                _unitOfWork.Transaction
+            );
+        },
+            methodName,
+            _className
+        );
+        return result;
     }
 
-    public Task<CanvasEntity> Delete()
+    public async Task<DatabaseResult<CanvasEntity>> Delete(int id)
     {
-        throw new NotImplementedException();
+        string methodName = nameof(Delete);
+
+        DatabaseResult<CanvasEntity> result = await _helper.ExecuteAsync<CanvasEntity>(async () => {
+            string sql = _queryService.DeleteById;
+            return await _unitOfWork.Connection.ExecuteAsync(
+                sql,
+                new {Id = id},
+                _unitOfWork.Transaction
+            );
+        },
+            methodName,
+            _className
+        );
+        return result;
     }
 
-    public Task<CanvasEntity[]> DeleteMany()
+    public async Task<DatabaseResult<CanvasEntity>> Get(int id)
     {
-        throw new NotImplementedException();
+        string methodName = nameof(Get);
+
+        DatabaseResult<CanvasEntity> result = await _helper.QueryAsync<CanvasEntity>(async () => {
+            string sql = _queryService.GetById;
+            return await _unitOfWork.Connection.QueryFirstOrDefaultAsync<CanvasEntity>(
+                sql,
+                new {Id = id},
+                _unitOfWork.Transaction
+            );
+        },
+            methodName,
+            _className
+        );
+        return result;
     }
 
-    public Task<CanvasEntity> Get()
+    public async Task<DatabaseResult<CanvasEntity>> Update(CanvasEntity entity)
     {
-        throw new NotImplementedException();
-    }
+        string methodName = nameof(Update);
 
-    public Task<CanvasEntity[]> GetMany()
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<CanvasEntity> Update()
-    {
-        throw new NotImplementedException();
+        DatabaseResult<CanvasEntity> result = await _helper.ExecuteAsync<CanvasEntity>(async () => {
+            string sql = _queryService.UpdateById;
+            return await _unitOfWork.Connection.ExecuteAsync(
+                sql,
+                entity,
+                _unitOfWork.Transaction
+            );
+        },
+            methodName,
+            _className
+        );
+        return result;
     }
 }

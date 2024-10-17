@@ -1,0 +1,15 @@
+.innerContainer{
+    display: flex;
+    width: 300%;
+    height: 300%;
+    justify-content: center;
+    align-items: center;
+    background-color: antiquewhite;
+}
+
+.canvasContainer {
+     border: 10px solid black;
+     overflow: hidden;
+     touch-action: none;
+
+}

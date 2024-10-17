@@ -1,0 +1,32 @@
+.color-palette {
+    position: absolute;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%; /* Fixed width for mobile */
+    overflow-x: auto; /* Enable horizontal scrolling */
+    white-space: nowrap; /* Prevent wrapping */
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .color-palette-inner {
+    display: inline-flex;
+    gap: 8px;
+  }
+  
+  .color-swatch {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  
+  .color-swatch.selected {
+    transform: scale(1.2);
+    border: 2px solid #000;
+  }
+  
