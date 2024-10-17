@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import useWindowSize from "../../../application/hooks/useWindowSize";
 import { RootContext } from "../../domain/context/RootContextProvider";
-import "../../styles/Canvas.css";
+import style from "../../styles/canvas/Canvas.module.css";
 
 export default function CanvasBase({children}){
     const {width, height} = useWindowSize();
@@ -10,7 +10,7 @@ export default function CanvasBase({children}){
     const usableHeight = height - context.constants.topNavBarHeight;
     return (
         <>
-        <div className="canvas" style={{width: width, height: usableHeight, border: "10px solid black"}}>
+        <div className={style.container} style={{width: width, height: usableHeight}}>
             {children}
         </div>
         </>
