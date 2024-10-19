@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import useWindowSize from "../../../application/hooks/useWindowSize";
-import { RootContext } from "../../domain/context/RootContextProvider";
+import { RootContext } from "../../../domain/context/RootContextProvider";
 import style from "../../styles/canvas/Canvas.module.css";
 
 export default function CanvasBase({children}){
