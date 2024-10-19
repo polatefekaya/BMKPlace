@@ -18,6 +18,21 @@
     font-family: "press-start";
 }
 
+.canvasHeader{
+    font-family: "press-start";
+    font-size: 200px !important; 
+}
+
+.canvasInformationContainer{
+
+}
+.canvasInformationHeaader{
+
+}
+.canvasInformationItem{
+    
+}
+
 @font-face {
     font-family: "press-start";
     src: url("../../../../public/PressStart2P-Regular.ttf") format("truetype");

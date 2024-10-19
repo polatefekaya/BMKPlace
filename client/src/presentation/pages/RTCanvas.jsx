@@ -1,15 +1,19 @@
 // src/presentation/pages/PerfCanvas.jsx
-import React, { useRef, useEffect, useState } from 'react';
-import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
+import React, { useRef, useEffect, useState, useContext } from 'react';
+import { TransformWrapper, TransformComponent, useTransformContext } from 'react-zoom-pan-pinch';
 import signalRService from '../../application/services/signalRService';
 import useWindowSize from '../../application/hooks/useWindowSize';
 import ColorPalette from '../components/colorPalette';
+import CanvasComponent from '../components/canvas/CanvasComponent';
+import style from "../styles/canvas/Canvas.module.css"
+import { RootContext } from '../../domain/context/RootContextProvider';
 
 export default function RTCanvas() {
   const canvasRef = useRef(null);
   const [isConnected, setIsConnected] = useState(false);
   const { width, height } = useWindowSize();
-
+  const context = useContext(RootContext);
+  const usableHeight = height - context.constants.topNavBarHeight;
   // Grid parameters
   const gridSize = 200;
   const cellSize = 50;
@@ -27,6 +31,9 @@ export default function RTCanvas() {
 
   // Initialize cell state array
   const cells = useRef([]);
+
+  const transformStateRef = useRef({ scale: 1, positionX: 0, positionY: 0 });
+
 
   // Drawing functions
   const drawGrid = () => {
@@ -51,16 +58,11 @@ export default function RTCanvas() {
       }
     }
 
-    // Draw grid lines
-    context.strokeStyle = '#ccc';
-    context.lineWidth = 0.01;
-
     // Vertical lines
     for (let x = 0; x <= gridSize; x++) {
       context.beginPath();
       context.moveTo(x * cellSize, 0);
       context.lineTo(x * cellSize, gridSize * cellSize);
-      context.stroke();
     }
 
     // Horizontal lines
@@ -68,7 +70,6 @@ export default function RTCanvas() {
       context.beginPath();
       context.moveTo(0, y * cellSize);
       context.lineTo(gridSize * cellSize, y * cellSize);
-      context.stroke();
     }
   };
 
@@ -80,9 +81,9 @@ export default function RTCanvas() {
     context.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
 
     // Optionally redraw grid lines for the pixel
-    context.strokeStyle = '#ccc';
-    context.lineWidth = 0.5;
-    context.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
+    // context.strokeStyle = '#ccc';
+    // context.lineWidth = 0.001;
+    // context.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
   };
 
   useEffect(() => {
@@ -133,38 +134,36 @@ export default function RTCanvas() {
     signalRService.invoke('SendPixelUpdate', { x, y, colorIndex });
   };
 
-  const handleClick = (e, { scale, positionX, positionY }) => {
+  const handleClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-
+  
+    const { scale, positionX, positionY } = transformStateRef.current;
+  
     console.log(`Transformations: positionX=${positionX}, positionY=${positionY}, scale=${scale}`);
-
+  
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
-
+  
     // Get mouse position relative to canvas
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-
+  
     // Adjust for transformations
     const contentX = (x - positionX) / scale;
     const contentY = (y - positionY) / scale;
-
-    // Alternative adjustment if the above doesn't work:
-    // const contentX = (x + positionX) / scale;
-    // const contentY = (y + positionY) / scale;
-
+  
     // Calculate grid cell indices
     const cellX = Math.floor(contentX / cellSize);
     const cellY = Math.floor(contentY / cellSize);
-
+  
     console.log(`Clicked cell: (${cellX}, ${cellY})`);
     console.log(`Mouse screen position: (${e.clientX}, ${e.clientY})`);
     console.log(`Canvas position: (${rect.left}, ${rect.top})`);
     console.log(`Mouse canvas position: (${x}, ${y})`);
     console.log(`Content coordinates: (${contentX}, ${contentY})`);
     console.log(`Grid cell indices: (${cellX}, ${cellY})`);
-
+  
     if (
       cellX >= 0 &&
       cellX < gridSize &&
@@ -177,9 +176,11 @@ export default function RTCanvas() {
     }
   };
   
+  
 
   return (
-    <div style={{ width: width, height: height, overflow: 'hidden' }}>
+    <div style={{ width: width, height: usableHeight, overflow: 'hidden' }}>
+
       <TransformWrapper
         initialScale={1}
         initialPositionX={0}
@@ -207,35 +208,108 @@ export default function RTCanvas() {
           sizeY: 0,
         }}
         limitToBounds={false}
+        onZoom={(ref) => {
+          console.log('onZoom event:', ref);
+          transformStateRef.current = {
+            scale: ref.state.scale,
+            positionX: ref.state.positionX,
+            positionY: ref.state.positionY,
+          };
+        }}
+        onPanning={(ref) => {
+          console.log('onPanning event:', ref);
+          transformStateRef.current = {
+            scale: ref.state.scale,
+            positionX: ref.state.positionX,
+            positionY: ref.state.positionY,
+          };
+        }}
+        onPinching={(ref) => {
+          console.log('onPinching event:', ref);
+          transformStateRef.current = {
+            scale: ref.state.scale,
+            positionX: ref.state.positionX,
+            positionY: ref.state.positionY,
+          };
+        }}
       >
-        {({ scale, positionX, positionY, ...rest }) => (
-          <TransformComponent
-            wrapperStyle={{
-              width: '100%',
-              height: '100%',
-              touchAction: 'none',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            <canvas
-              ref={canvasRef}
-              style={{
-                border: '1px solid black',
-                display: 'block',
-                width: `${gridSize * cellSize}px`,
-                height: `${gridSize * cellSize}px`,
+        {(transformProps) => {
+          console.log('TransformWrapper render prop parameters:', transformProps);
+          const { scale, positionX, positionY } = transformProps.instance.transformState;
+
+          const handleState = () => {
+            console.log('DEBUG FLAG\n BOUNDS: ', transformProps.instance.bounds, '\n', 'TRANS STATE: ', transformProps.instance.transformState);
+          }
+
+          const handleClick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            console.log(`Transformations: positionX=${positionX}, positionY=${positionY}, scale=${scale}`);
+
+            const canvas = canvasRef.current;
+            const rect = canvas.getBoundingClientRect();
+
+            // Get mouse position relative to canvas
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            console.log(`Mouse screen position: (${e.clientX}, ${e.clientY})`);
+            console.log(`Canvas position: (${rect.left}, ${rect.top})`);
+            console.log(`Mouse canvas position: (${x}, ${y})`);
+
+            // Adjust for transformations
+            const contentX = (x - positionX) / scale;
+            const contentY = (y - positionY) / scale;
+
+            console.log(`Content coordinates: (${contentX}, ${contentY})`);
+
+            // Calculate grid cell indices
+            const cellX = Math.floor(contentX / cellSize);
+            const cellY = Math.floor(contentY / cellSize);
+
+            console.log(`Grid cell indices: (${cellX}, ${cellY})`);
+
+            if (
+              cellX >= 0 &&
+              cellX < gridSize &&
+              cellY >= 0 &&
+              cellY < gridSize
+            ) {
+              cells.current[cellX][cellY] = selectedColorIndex;
+              drawPixel(cellX, cellY, selectedColorIndex);
+              sendPixelUpdate(cellX, cellY, selectedColorIndex);
+            } else {
+              console.warn(`Clicked outside the grid boundaries: (${cellX}, ${cellY})`);
+            }
+          };
+          return(
+            <TransformComponent
+              wrapperStyle={{
+                width: '100%',
+                height: '100%',
+                touchAction: 'none',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
               }}
-              onClick={(e) =>
-                handleClick(
-                  e,
-                  { scale, positionX, positionY },
-                )
-              }
-            />
-          </TransformComponent>
-        )}
+              
+            >
+                <h1 className={style.canvasHeader}>BMK Place</h1>
+              <canvas
+                ref={canvasRef}
+                style={{
+                  border: '1px solid black',
+                  display: 'block',
+                  width: `${gridSize * cellSize}px`,
+                  height: `${gridSize * cellSize}px`,
+                }}
+                onClick={handleClick}
+                
+              />
+              {/* <CanvasComponent canvasRef={canvasRef} handleClick={handleClick} gridSize={gridSize} cellSize={cellSize}/> */}
+            </TransformComponent>)
+        }}
       </TransformWrapper>
       {/* Include your ColorPalette component and pass setSelectedColorIndex */}
       <ColorPalette setSelectedColorIndex={setSelectedColorIndex} />
