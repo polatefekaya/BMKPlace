@@ -3,7 +3,7 @@ using SRWorkerServer.Domain.Data.Entities;
 
 namespace SRWorkerServer.Domain.Data.DTO.Response;
 
-public class PixelGetAllByCanvasResponseDto
+public record class PixelGetAllByCanvasResponseDto
 {
-    public PixelEntity[] Pixels {get; set;}
+    public required PixelEntity[] Pixels {get; init;}
 }

@@ -2,11 +2,11 @@ using System;
 
 namespace SRWorkerServer.Domain.Data.DTO;
 
-public class PixelAddDto
+public record class PixelAddDto
 {
-    public int UserId {get; set;}
-    public int CanvasId {get; set;}
-    public int ColorId {get; set;}
-    public string? PosX {get; set;}
-    public string? PosY {get; set;}
+    public int UserId {get; init;}
+    public int CanvasId {get; init;}
+    public int ColorId {get; init;}
+    public string? PosX {get; init;}
+    public string? PosY {get; init;}
 }

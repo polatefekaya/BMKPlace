@@ -6,67 +6,31 @@ using SRWorkerServer.Application;
 using SRWorkerServer.Infrastructure;
 using SRWorkerServer.Domain.Data.Settings;
 using RabbitMQ.Client;
+using SRWorkerServer.Infrastructure.SignalR.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.Configure<RabbitMqSettings>(builder.Configuration.GetSection("RabbitMqSettings"));
-
-
-Uri keyValUri = new Uri("https://bmkplace-keys.vault.azure.net/");
-builder.Configuration.AddAzureKeyVault(keyValUri, new DefaultAzureCredential());
-
-Log.Logger = new LoggerConfiguration().CreateLogger();
 
 string insightsKey = builder.Configuration["APPINSIGHTSINSTRUMENTATIONKEY"]!;
 builder.Configuration["Serilog:WriteTo:2:Args:instrumentationKey"] = insightsKey;
 
-builder.Host.UseSerilog((HostBuilderContext context, IServiceProvider services, LoggerConfiguration loggerConfiguration) => {
-    loggerConfiguration
-    .ReadFrom.Configuration(context.Configuration)
-    .ReadFrom.Services(services);
-});
+builder.Services.Configure<RabbitMqSettings>(builder.Configuration.GetSection("RabbitMqSettings"));
 
-builder.Services.AddApplicationInsightsTelemetry(options => {
-    options.ConnectionString = insightsKey;
-    options.EnableAdaptiveSampling = true;
-    options.EnableRequestTrackingTelemetryModule = true;
-    options.EnableAppServicesHeartbeatTelemetryModule = true;
-    options.EnableHeartbeat = true;
-    options.EnableDependencyTrackingTelemetryModule = true;
-    options.EnableDiagnosticsTelemetryModule = true;
-    options.EnablePerformanceCounterCollectionModule = true;
-    options.EnableQuickPulseMetricStream = true;
-    options.EnableAzureInstanceMetadataTelemetryModule = true;
-});
+builder.Configuration.ConfigureKeyVault();
 
-string[] allowedOrigins = new[] { 
-    "https://localhost:3000",
-    "https://192.168.68.56:3000",
-    "https://192.168.68.56",
-    "https://localhost" };
+Log.Logger = new LoggerConfiguration().CreateLogger();
 
-builder.Services.AddCors(options => {
-    options.AddPolicy("CorsPolicy",builder => {
-        builder.WithOrigins(allowedOrigins)
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials();
-    });
-});
 
-builder.Services.AddSignalR().AddAzureSignalR(options => {
-    options.ConnectionString = builder.Configuration["SIGNALR-CONNECTION-STRING"];
-});
+builder.Host.ConfigureSerilog();
 
-builder.Services.AddSingleton<IConnection>(sp => {
-    IConnectionFactory factory = new ConnectionFactory(){
-        HostName = builder.Configuration["RabbitMqSettings:HostName"],
-        UserName = builder.Configuration["RabbitMqSettings:Username"],
-        Password = builder.Configuration["RabbitMqSettings:Password"]
-    };
+builder.Services.ConfigureTelemetry(insightsKey);
 
-    return factory.CreateConnection();
-});
+builder.Services.ConfigureCors();
+
+builder.Services.ConfigureSignalR(builder.Configuration["SIGNALR-CONNECTION-STRING"]);
+
+builder.Services.AddSingletonConnection(
+    builder.Configuration.GetSection("RabbitMqSettings").Get<RabbitMqSettings>()
+);
 
 builder.Services.AddApplication()
                 .AddInfrastructure();
