@@ -39,23 +39,24 @@ public class PixelService : IPixelService
         await _coreService.PublishAndBroadcast<PixelGetByPositionDto, PixelGetByPositionDto>(groupName, "c", dto, nameof(GetByPosition), _className);
     }
 
-    public Task OnConnectedAsync(string groupName, string message)
+    public async Task OnConnectedAsync(string groupName, ConnectedDto dto)
     {
         throw new NotImplementedException();
     }
 
-    public Task OnConnectionCloseAsync(string groupName, object message)
+    public async Task OnConnectionCloseAsync(string groupName, ConnectionCloseDto dto)
     {
         throw new NotImplementedException();
     }
 
-    public Task OnFirstConnectAsync(string groupName, FirstConnectDto dto)
+    public async Task OnFirstConnectAsync(string groupName, FirstConnectDto dto)
     {
+        //Get the current canvas state
         throw new NotImplementedException();
     }
 
-    public Task SendPixelUpdate(string groupName, SendPixelUpdateDto dto)
+    public async Task SendPixelUpdate(string groupName, SendPixelUpdateDto dto)
     {
-        throw new NotImplementedException();
+        await _coreService.PublishAndBroadcast<SendPixelUpdateDto, SendPixelUpdateDto>(groupName, "c", dto, nameof(GetByPosition), _className);
     }
 }
