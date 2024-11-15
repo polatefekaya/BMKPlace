@@ -1,4 +1,5 @@
 using System;
+using SRWorkerServer.GridCache.Data.Entities;
 
 namespace SRWorkerServer.GridCache.Interfaces;
 
@@ -19,7 +20,21 @@ public interface ICacheService
     /// <param name="posX"></param>
     /// <param name="posY"></param>
     /// <returns></returns>
-    public Task<byte> GetByte(string gridName, int posX, int posY);
+    public Task<byte?> GetByte(string gridName, int posX, int posY);
+
+    /// <summary>
+    /// Gets all the bytes in given grid name. Bytes are shrinked.
+    /// </summary>
+    /// <param name="gridName"></param>
+    /// <returns></returns>
+    public Task<byte[]?> GetAllBytes(string gridName);
+
+    /// <summary>
+    /// Gets the grid with given gridName. Inner Byte array is shrinked.
+    /// </summary>
+    /// <param name="gridName"></param>
+    /// <returns></returns>
+    public Task<GridEntity?> GetGrid(string gridName);
 
     /// <summary>
     /// It resets value to 0 (white color)

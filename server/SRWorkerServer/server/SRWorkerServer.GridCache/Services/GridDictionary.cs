@@ -42,18 +42,25 @@ public class GridDictionary
         return false;
     }
 
-    public byte TryGetPoint(string key, int posX, int posY){
+    public byte? TryGetPoint(string key, int posX, int posY){
         if(_internalDictionary.TryGetValue(key, out var entity)){
             int pos = entity.CalculatePosition(posX, posY);
             bool isInBounds = pos >= 0 && pos < entity.Bytes.Length;
 
             if (!isInBounds){
-                return 0;
+                return null;
             }
 
             return entity.Bytes[pos];
         }
-        return 0;
+        return null;
+    }
+
+    public byte[]? TryGetAllPoints(string key){
+        if(_internalDictionary.TryGetValue(key, out var entity)){
+            return entity.Bytes;
+        }
+        return null;
     }
 
     // Additional thread-safe dictionary operations

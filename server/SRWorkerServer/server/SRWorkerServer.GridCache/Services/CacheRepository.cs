@@ -33,6 +33,7 @@ public class CacheRepository : ICacheRepository
     {
         if (!_cache.ContainsKey(gridName))
         {
+            _logger.LogError("No grid found");
             return;
         }
         bool pointAdded = _cache.TryAddPoint(gridName, posX, posY, point);
@@ -61,9 +62,25 @@ public class CacheRepository : ICacheRepository
         throw new NotImplementedException();
     }
 
-    public Task<byte> GetPointAsync()
+    public Task<byte?> GetPointAsync()
     {
         throw new NotImplementedException();
+    }
+
+    public async Task<byte[]?> GetAllPoints(string gridName){
+        if (!_cache.ContainsKey(gridName))
+        {
+            _logger.LogError("No grid found, returning null");
+            return null;
+        }
+
+        byte[]? points = _cache.TryGetAllPoints(gridName);
+        if(points is null){
+            _logger.LogWarning("Retrieved points is null");
+            return null;
+        }
+
+        return points;
     }
 
     public async Task<bool> GridExists(string gridName)
