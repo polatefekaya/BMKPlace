@@ -4,6 +4,7 @@ using Serilog;
 using SRWorkerServer.Web;
 using SRWorkerServer.Application;
 using SRWorkerServer.Infrastructure;
+using SRWorkerServer.GridCache;
 using SRWorkerServer.Domain.Data.Settings;
 using RabbitMQ.Client;
 using SRWorkerServer.Infrastructure.SignalR.Hubs;
@@ -34,7 +35,8 @@ builder.Services.AddSingletonConnection(
 
 builder.Services.AddApplication()
                 .AddInfrastructure();
-//builder.Services.AddSingleton<IHubContext<PixelHub>>();
+                
+builder.Services.AddGridCache();
 
 var app = builder.Build();
 

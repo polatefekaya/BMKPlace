@@ -7,9 +7,9 @@ namespace SRWorkerServer.GridCache.Services;
 
 public class BitwiseEngine : IBitwiseEngine
 {
-    private readonly byte MERGE_SLICE = 4;
-    private readonly byte EXTRACT_PART = 4;
-    private readonly byte SHIFT_AMOUNT = 4;
+    private const byte MERGE_SLICE = 4;
+    private const byte EXTRACT_PART = 4;
+    private const byte SHIFT_AMOUNT = 4;
 
     private readonly ILogger<BitwiseEngine> _logger;
     private readonly IBitwiseService _bitwiseService;
@@ -21,6 +21,7 @@ public class BitwiseEngine : IBitwiseEngine
         _bitwiseService = bitwiseService;
 
         _className = nameof(BitwiseEngine);
+        
     }
 
     public async Task<byte> Shrink(byte first, byte second, BitwiseShrinkOptions? options = null)
@@ -39,7 +40,9 @@ public class BitwiseEngine : IBitwiseEngine
         );
 
         //Shrink Logic
+        first = await _bitwiseService.Shift(first, shiftAmount);
+        byte mergedValue = await _bitwiseService.Merge(first, second, mergeSlice);
 
-        return 0;
+        return mergedValue;
     }
 }
