@@ -5,21 +5,23 @@ using SRWorkerServer.GridCache.Interfaces;
 
 namespace SRWorkerServer.GridCache.Services;
 
-public class GridCacheRepository : IGridCacheRepository, IPointCacheRepository
+public class GeneralCacheRepository : IGeneralCacheRepository
 {
-    private readonly ILogger<GridCacheRepository> _logger;
+    private readonly ILogger<GeneralCacheRepository> _logger;
     private readonly GridDictionary _cache;
 
-    public GridCacheRepository(ILogger<GridCacheRepository> logger, GridDictionary cache){
+    public GeneralCacheRepository(ILogger<GeneralCacheRepository> logger, GridDictionary cache)
+    {
         _logger = logger;
         _cache = cache;
     }
-    
+
     public async Task AddGridAsync(string name, GridEntity? entity)
     {
         bool added = _cache.TryAdd(name, entity ?? new());
 
-        if (added){
+        if (added)
+        {
             _logger.LogInformation("Grid Succesfully Added");
             return;
         }
@@ -29,12 +31,14 @@ public class GridCacheRepository : IGridCacheRepository, IPointCacheRepository
 
     public async Task AddPointAsync(string gridName, byte point, int posX, int posY)
     {
-        if(!_cache.ContainsKey(gridName)){
+        if (!_cache.ContainsKey(gridName))
+        {
             return;
         }
         bool pointAdded = _cache.TryAddPoint(gridName, posX, posY, point);
 
-        if(pointAdded){
+        if (pointAdded)
+        {
             _logger.LogInformation("Point Succesfully Added");
             return;
         }
@@ -60,6 +64,11 @@ public class GridCacheRepository : IGridCacheRepository, IPointCacheRepository
     public Task<byte> GetPointAsync()
     {
         throw new NotImplementedException();
+    }
+
+    public async Task<bool> GridExists(string gridName)
+    {
+        return _cache.ContainsKey(gridName);
     }
 
     public Task UpdateGridAsync()

@@ -7,15 +7,16 @@ namespace SRWorkerServer.GridCache;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddGridCache(this IServiceCollection services){
+    public static IServiceCollection AddGridCache(this IServiceCollection services)
+    {
         services.AddSingleton<GridDictionary>();
 
         services.AddScoped<ICacheService, CacheService>();
         services.AddScoped<IGridCacheFactory, GridCacheFactory>();
-        services.AddScoped<IGridCacheRepository, GridCacheRepository>();
+        services.AddScoped<IGeneralCacheRepository, GeneralCacheRepository>();
 
         services.AddScoped<IBitwiseEngine, BitwiseEngine>();
-        services.AddScoped<IBitwiseService,BitwiseService>();
+        services.AddScoped<IBitwiseService, BitwiseService>();
 
         return services;
     }
