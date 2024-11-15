@@ -13,7 +13,7 @@ public static class DependencyInjection
 
         services.AddScoped<ICacheService, CacheService>();
         services.AddScoped<IGridCacheFactory, GridCacheFactory>();
-        services.AddScoped<IGeneralCacheRepository, GeneralCacheRepository>();
+        services.AddScoped<ICacheRepository, CacheRepository>();
 
         services.AddScoped<IBitwiseEngine, BitwiseEngine>();
         services.AddScoped<IBitwiseService, BitwiseService>();

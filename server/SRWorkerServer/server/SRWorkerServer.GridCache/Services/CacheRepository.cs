@@ -5,12 +5,12 @@ using SRWorkerServer.GridCache.Interfaces;
 
 namespace SRWorkerServer.GridCache.Services;
 
-public class GeneralCacheRepository : IGeneralCacheRepository
+public class CacheRepository : ICacheRepository
 {
-    private readonly ILogger<GeneralCacheRepository> _logger;
+    private readonly ILogger<CacheRepository> _logger;
     private readonly GridDictionary _cache;
 
-    public GeneralCacheRepository(ILogger<GeneralCacheRepository> logger, GridDictionary cache)
+    public CacheRepository(ILogger<CacheRepository> logger, GridDictionary cache)
     {
         _logger = logger;
         _cache = cache;
