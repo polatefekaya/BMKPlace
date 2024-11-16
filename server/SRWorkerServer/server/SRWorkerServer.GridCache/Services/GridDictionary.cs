@@ -56,6 +56,11 @@ public class GridDictionary
         return null;
     }
 
+    public bool TryResetPoint(string key, int posX, int posY){
+        //TODO finish implementation
+        return true;
+    }
+
     public byte[]? TryGetAllPoints(string key){
         if(_internalDictionary.TryGetValue(key, out var entity)){
             return entity.Bytes;
