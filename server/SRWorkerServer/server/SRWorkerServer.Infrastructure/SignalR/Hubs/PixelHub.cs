@@ -4,21 +4,30 @@ using SRWorkerServer.Application.Interfaces;
 using SRWorkerServer.Domain.Data.DTO;
 using SRWorkerServer.Domain.Data.DTO.Request;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Logging;
 
-namespace SRWorkerServer.Web;
+namespace SRWorkerServer.Infrastructure.SignalR.Hubs;
 
 public class PixelHub : Hub
 {
-    private ILogger<PixelHub> _logger;
-    //private readonly IPixelService _pixelService;
+    private readonly ILogger<PixelHub> _logger;
+    private readonly IPixelService _pixelService;
 
-    public PixelHub(ILogger<PixelHub> logger){
+    public PixelHub(ILogger<PixelHub> logger, IPixelService pixelService){
         _logger = logger;
-        //_pixelService = pixelService;
+        _pixelService = pixelService;
+    }
+
+    public async Task OnFirstConnectAsync(FirstConnectDto message){
+        _logger.LogInformation("First Connection");
     }
 
     public async Task OnConnectedAsync(string message){
         _logger.LogInformation("connected" + message);
+    }
+
+    public async Task OnConnectionCloseAsync(object message){
+
     }
 
     public async Task SendPixelUpdate(object message){

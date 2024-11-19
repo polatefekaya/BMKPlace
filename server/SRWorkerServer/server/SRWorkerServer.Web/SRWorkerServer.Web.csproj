@@ -22,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SRWorkerServer.Application\SRWorkerServer.Application.csproj" />
     <ProjectReference Include="..\SRWorkerServer.Domain\SRWorkerServer.Domain.csproj" />
+    <ProjectReference Include="..\SRWorkerServer.GridCache\SRWorkerServer.GridCache.csproj" />
     <ProjectReference Include="..\SRWorkerServer.Infrastructure\SRWorkerServer.Infrastructure.csproj" />
   </ItemGroup>
 
