@@ -101,10 +101,6 @@ public class GridDictionary
         }
         return (false, null);
     }
-    public bool TryResetPoint(string key, int posX, int posY){
-        //TODO finish implementation
-        return true;
-    }
 
     /// <summary>
     /// Tries to get all points with specified gridName (key) from GridEntity which is in the internal concurrent dictionary

@@ -82,8 +82,8 @@ public class CacheService : ICacheService
             _logger.LogError("Grid is not exists, returning null");
             return null;
         }
-
-        byte? point = await _repository.GetPointAsync();
+        
+        byte? point = await _repository.GetPointAsync(gridName, posX, posY);
         _logger.LogDebug("Point succesfully got, Value: {value}", point);
 
         _logger.LogInformation("{methodName} is finished in {className}", nameof(GetByte), _className);
@@ -128,8 +128,7 @@ public class CacheService : ICacheService
             return;
         }
 
-        //TODO finish the deletePointAsync method
-        await _repository.DeletePointAsync();
+        await _repository.ResetPointAsync(gridName, posX, posY);
         _logger.LogDebug("Point succesfully resetted");
 
         _logger.LogInformation("{methodName} is finished in {className}", nameof(ResetByte), _className);
