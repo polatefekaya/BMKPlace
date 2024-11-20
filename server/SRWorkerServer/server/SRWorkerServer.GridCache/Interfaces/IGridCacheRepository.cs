@@ -7,7 +7,7 @@ public interface IGridCacheRepository
 {
     public Task AddGridAsync(string name, GridEntity? entity);
     public Task<GridEntity?> GetGridAsync(string name);
-    public Task UpdateGridAsync();
-    public Task DeleteGridAsync();
+    public Task UpdateGridAsync(string gridName, GridEntity grid);
+    public Task DeleteGridAsync(string gridName);
     public Task<bool> GridExists(string gridName);
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Reflection.Metadata;
 using Microsoft.Extensions.Logging;
 using SRWorkerServer.GridCache.Data.Entities;
 using SRWorkerServer.GridCache.Interfaces;
@@ -47,14 +48,34 @@ public class CacheRepository : ICacheRepository
         _logger.LogError("Point Can't Be Added");
     }
 
-    public Task DeleteGridAsync()
+    public async Task DeleteGridAsync(string gridName)
     {
-        throw new NotImplementedException();
+        if (!_cache.ContainsKey(gridName))
+        {
+            _logger.LogError("No grid found");
+            return;
+        }
+
+        bool gridRemoved = _cache.TryRemove(gridName);
+
+        if (gridRemoved)
+        {
+            _logger.LogInformation("Grid Succesfully Deleted");
+            return;
+        }
+
+        _logger.LogError("Grid Can't Be Deleted");
     }
 
-    public Task DeletePointAsync()
+    public async Task ResetPointAsync(string gridName, int posX, int posY)
     {
-        throw new NotImplementedException();
+        if (!_cache.ContainsKey(gridName))
+        {
+            _logger.LogError("No grid found");
+            return;
+        }
+
+        //bool pointResetted = _cache.Try
     }
 
     public Task<GridEntity?> GetGridAsync(string name)
@@ -62,7 +83,7 @@ public class CacheRepository : ICacheRepository
         throw new NotImplementedException();
     }
 
-    public Task<byte?> GetPointAsync()
+    public Task<byte?> GetPointAsync(string gridName, int posX, int posY)
     {
         throw new NotImplementedException();
     }
@@ -88,12 +109,12 @@ public class CacheRepository : ICacheRepository
         return _cache.ContainsKey(gridName);
     }
 
-    public Task UpdateGridAsync()
+    public Task UpdateGridAsync(string gridName, GridEntity grid)
     {
         throw new NotImplementedException();
     }
 
-    public Task UpdatePointAsync()
+    public Task UpdatePointAsync(string gridName, int posX, int posY, byte point)
     {
         throw new NotImplementedException();
     }
