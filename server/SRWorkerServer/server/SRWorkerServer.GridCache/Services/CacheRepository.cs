@@ -74,8 +74,8 @@ public class CacheRepository : ICacheRepository
             return null;
         }
 
-        byte[]? points = _cache.TryGetAllPoints(gridName);
-        if(points is null){
+        (bool success, byte[]? points) = _cache.TryGetAllPoints(gridName);
+        if(!success){
             _logger.LogWarning("Retrieved points is null");
             return null;
         }
