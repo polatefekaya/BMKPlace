@@ -1,6 +1,6 @@
 using System;
 
-namespace BMKPlace.Domain.Primitives;
+namespace SharedKernel.Primitives;
 
 public interface IDomainEvent
 {

@@ -1,6 +1,6 @@
 using System;
 
-namespace BMKPlace.Domain.Primitives;
+namespace SharedKernel.Primitives;
 
 public abstract class AggregateRoot<TId> : Entity<TId> where TId : notnull
 {
@@ -12,12 +12,12 @@ public abstract class AggregateRoot<TId> : Entity<TId> where TId : notnull
 
     protected AggregateRoot() : base() {}
 
-    protected void AddDominEvent(IDomainEvent domainEvent){
+    protected void AddDomainEvent(IDomainEvent domainEvent){
         ArgumentNullException.ThrowIfNull(domainEvent, nameof(domainEvent));
         _domainEvents.Add(domainEvent);
     }
 
-    protected void ClearDomainEvents(){
+    public void ClearDomainEvents(){
         _domainEvents.Clear();
     }
 }

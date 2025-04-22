@@ -1,5 +1,5 @@
 using System;
-using BMKPlace.Domain.Primitives;
+using SharedKernel.Primitives;
 
 namespace BMKPlace.Domain.ValueObjects;
 
