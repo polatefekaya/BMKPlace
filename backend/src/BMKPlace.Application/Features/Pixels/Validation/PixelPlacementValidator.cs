@@ -18,7 +18,7 @@ public class PixelPlacementValidator : IPixelPlacementValidator
     }
     
     public Task ValidatePlacementRulesAsync(
-        Canvas canvas,
+        Domain.Entities.Canvas canvas,
         CanvasUserContext userContext,
         ColorPalette palette,
         Coordinate coordinate,

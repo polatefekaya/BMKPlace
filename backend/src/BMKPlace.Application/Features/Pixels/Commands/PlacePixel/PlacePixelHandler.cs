@@ -1,4 +1,5 @@
 using System;
+using BMKPlace.Application.Common.Helpers;
 using BMKPlace.Application.Contracts.Abstractions.Infrastructure;
 using BMKPlace.Application.Contracts.Abstractions.Persistence;
 using BMKPlace.Application.Contracts.Abstractions.Realtime;
@@ -22,6 +23,7 @@ public class PlacePixelHandler : ICommandHandler<PlacePixelCommand, PixelDto>
     private readonly ICanvasCache _canvasCache;
     private readonly IPixelNotifier _pixelNotifier;
     private readonly IPixelPlacementValidator _placementValidator;
+    private readonly IDateTimeService _dateTimeService;
     private readonly ILogger<PlacePixelHandler> _logger;
     public PlacePixelHandler(
         ICanvasRepository canvasRepository,
@@ -32,6 +34,7 @@ public class PlacePixelHandler : ICommandHandler<PlacePixelCommand, PixelDto>
         ICanvasCache canvasCache,
         IPixelNotifier pixelNotifier,
         IPixelPlacementValidator placementValidator,
+        IDateTimeService dateTimeService,
         ILogger<PlacePixelHandler> logger
         )
     {
@@ -43,94 +46,121 @@ public class PlacePixelHandler : ICommandHandler<PlacePixelCommand, PixelDto>
         _canvasCache = canvasCache;
         _pixelNotifier = pixelNotifier;
         _placementValidator = placementValidator;
+        _dateTimeService = dateTimeService;
         _logger = logger;
     }
     public async ValueTask<PixelDto> Handle(PlacePixelCommand command, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Handling PlacePixelCommand for Canvas {CanvasId}, User {UserId} at ({X},{Y})",
+        _logger.LogInformation("Starting PlacePixelCommand execution for Canvas {CanvasId}, User {UserId} at ({X},{Y})",
             command.CanvasId, command.UserId, command.X, command.Y);
 
-      
-        ValidateCommandInput(command); 
+        var (coordinate, color) = PerformInputValidationAndCreateVOs(command);
+        var operationTimestamp = GetOperationTimestamp(); // Use IDateTimeService ideally
+        var (canvas, userContext, palette) = await FetchRequiredDomainStateAsync(command.CanvasId, command.UserId, cancellationToken);
+        await PerformBusinessRuleValidationAsync(canvas, userContext, palette, coordinate, color, operationTimestamp, cancellationToken);
+        var persistedPixel = await ExecuteDomainLogicAndPersistAsync(command, coordinate, color, userContext, operationTimestamp, cancellationToken);
 
-        DateTimeOffset operationTimestamp = DateTimeOffset.UtcNow; 
+        var resultDto = MapResultToDto(persistedPixel);
 
-        Coordinate coordinate = Coordinate.Create(command.X, command.Y);
-        Color color = Color.Create(command.R, command.G, command.B);
+        _logger.LogInformation("PlacePixelCommand execution completed successfully for Pixel ID {PixelId}.", persistedPixel.Id);
 
-        _logger.LogDebug("Fetching required entities for validation...");
-        Task<Canvas?> canvasTask = _canvasRepository.GetByIdAsync(command.CanvasId, cancellationToken);
-        Task<CanvasUserContext?> userContextTask = _canvasUserContextRepository.GetByCanvasAndUserAsync(command.CanvasId, command.UserId, cancellationToken);
+        return resultDto;
+    }
+
+private (Coordinate Coordinate, Color Color) PerformInputValidationAndCreateVOs(PlacePixelCommand command)
+    {
+        _logger.LogDebug("Performing input validation and creating Value Objects...");
+
+        Dictionary<string, List<string>> validationErrors = new();
+        if (command.CanvasId <= 0) ValidationHelpers.AddValidationError(validationErrors, nameof(command.CanvasId), "Canvas ID must be positive.");
+        if (command.UserId <= 0) ValidationHelpers.AddValidationError(validationErrors, nameof(command.UserId), "User ID must be positive.");
+
+        ValidationHelpers.ThrowIfErrorsExist(validationErrors, "Validation failed for pixel placement request.", _logger, command);
+
+        try
+        {
+            Coordinate coordinate = Coordinate.Create(command.X, command.Y);
+            Color color = Color.Create(command.R, command.G, command.B);
+            _logger.LogDebug("Input validation passed. VOs created.");
+            return (coordinate, color);
+        }
+        catch (DomainValidationException ex) 
+        {
+            _logger.LogWarning(ex, "Value Object creation failed during input validation.");
+
+            var errors = new Dictionary<string, string[]> { { "colorOrCoordinate", new[] { ex.Message } } };
+            throw new ApplicationValidationException("Invalid coordinate or color value.", errors, ex);
+        }
+    }
+
+    private DateTimeOffset GetOperationTimestamp()
+    {
+        return _dateTimeService.UtcNow;
+    }
+
+    private async Task<(Canvas Canvas, CanvasUserContext UserContext, ColorPalette Palette)> FetchRequiredDomainStateAsync(int canvasId, int userId, CancellationToken cancellationToken)
+    {
+        _logger.LogDebug("Fetching required domain state: Canvas {CanvasId}, UserContext for User {UserId}", canvasId, userId);
+        
+        Task<Canvas?> canvasTask = _canvasRepository.GetByIdAsync(canvasId, cancellationToken);
+        Task<CanvasUserContext?> userContextTask = _canvasUserContextRepository.GetByCanvasAndUserAsync(canvasId, userId, cancellationToken);
 
         await Task.WhenAll(canvasTask, userContextTask);
-        Canvas canvas = await canvasTask ?? throw new NotFoundException(nameof(Canvas), command.CanvasId);
-        CanvasUserContext userContext = await userContextTask ?? throw new NotFoundException($"User context not found for User ID {command.UserId} on Canvas ID {command.CanvasId}.");
+
+        Canvas canvas = await canvasTask ?? throw new NotFoundException(nameof(Canvas), canvasId);
+        CanvasUserContext userContext = await userContextTask ?? throw new NotFoundException($"User context not found for User ID {userId} on Canvas ID {canvasId}.");
 
         ColorPalette palette = await _colorPaletteRepository.GetByIdAsync(canvas.ColorPaletteId, cancellationToken)
             ?? throw new NotFoundException(nameof(ColorPalette), canvas.ColorPaletteId);
-        _logger.LogDebug("Entities fetched successfully.");
 
+        _logger.LogDebug("Domain state fetched successfully.");
+        return (canvas, userContext, palette);
+    }
 
-        _logger.LogDebug("Delegating business rule validation to IPixelPlacementValidator.");
+    private async Task PerformBusinessRuleValidationAsync(Canvas canvas, CanvasUserContext userContext, ColorPalette palette, Coordinate coordinate, Color color, DateTimeOffset timestamp, CancellationToken cancellationToken)
+    {
+        _logger.LogDebug("Delegating business rule validation...");
+
         await _placementValidator.ValidatePlacementRulesAsync(
-            canvas, userContext, palette, coordinate, color, operationTimestamp, cancellationToken);
+            canvas, userContext, palette, coordinate, color, timestamp, cancellationToken);
+        _logger.LogDebug("Business rule validation successful.");
+    }
 
-        _logger.LogDebug("Business rule validation passed.");
+    private async Task<Pixel> ExecuteDomainLogicAndPersistAsync(PlacePixelCommand command, Coordinate coordinate, Color color, CanvasUserContext userContext, DateTimeOffset timestamp, CancellationToken cancellationToken)
+    {
+        _logger.LogDebug("Executing domain logic and persisting changes...");
 
         Pixel pixelEvent = Pixel.Create(
             canvasId: command.CanvasId,
             coordinate: coordinate,
             color: color,
             userId: command.UserId,
-            timestamp: operationTimestamp
+            timestamp: timestamp
         );
-        _logger.LogDebug("Pixel domain entity created.");
 
-        _logger.LogDebug("Adding Pixel event and updating UserContext last placement time.");
         await _pixelRepository.AddAsync(pixelEvent, cancellationToken);
-        userContext.RecordPixelPlacement(operationTimestamp);
+        userContext.RecordPixelPlacement(timestamp);
 
-        _logger.LogInformation("Saving changes to database via Unit of Work...");
+        _logger.LogInformation("Committing transaction via Unit of Work...");
         int changes = await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("Database changes saved ({ChangeCount}). Pixel ID {PixelId} generated.", changes, pixelEvent.Id);
+        if (pixelEvent.Id <= 0)
+        {
+            _logger.LogError("Critical: Pixel ID was not populated after SaveChangesAsync. Check DB identity/sequence setup and EF Core configuration.");
+            throw new InvalidOperationException("Failed to retrieve generated Pixel ID after saving.");
+        }
+        _logger.LogInformation("Persistence successful. Pixel ID {PixelId} obtained.", pixelEvent.Id);
 
+        return pixelEvent;
+    }
 
-        // 7. --- Map Result ---
-        // Side effects (cache update, SignalR notification) are now handled by domain event handlers (e.g., PixelPlacedEventHandler)
-        // which will be triggered by the mediator *after* this handler completes successfully (post-commit).
-        // Therefore, the command handler's responsibility ends here by returning the result.
-        PixelDto resultDto = new(
+    private PixelDto MapResultToDto(Pixel pixelEvent)
+    {
+        _logger.LogDebug("Mapping persisted Pixel entity to PixelDto.");
+        return new PixelDto(
             pixelEvent.CanvasId, pixelEvent.Coordinate.X, pixelEvent.Coordinate.Y,
             pixelEvent.Color.Red, pixelEvent.Color.Green, pixelEvent.Color.Blue,
             pixelEvent.UserId, pixelEvent.Timestamp
-            // Add pixelEvent.Id if needed in DTO
         );
-
-        _logger.LogInformation("PlacePixelCommand handled successfully for Pixel ID {PixelId}.", pixelEvent.Id);
-        return resultDto;
-    }
-
-    private void ValidateCommandInput(PlacePixelCommand command)
-    {
-        Dictionary<string, string[]> validationErrors = new();
-        if (command.CanvasId <= 0) AddError(validationErrors, nameof(command.CanvasId), "Canvas ID must be positive.");
-        if (command.UserId <= 0) AddError(validationErrors, nameof(command.UserId), "User ID must be positive.");
-        // Coordinate/Color VOs handle their own intrinsic validation (non-negative, 0-255 range)
-
-        if (validationErrors.Count > 0)
-        {
-            _logger.LogWarning("Input validation failed for PlacePixelCommand: {@ValidationErrors}", validationErrors);
-            // Using structured logging for the dictionary
-            throw new ApplicationValidationException("Validation failed for pixel placement request.", validationErrors);
-        }
-    }
-
-    // Helper to build validation error dictionary (same as before)
-    private void AddError(Dictionary<string, string[]> errors, string propertyName, string errorMessage)
-    {
-        // Implementation omitted for brevity... see previous response
-        propertyName = propertyName[0].ToString().ToLowerInvariant() + propertyName.Substring(1); // camelCase
-        if (!errors.TryAdd(propertyName, new[] { errorMessage })) { errors[propertyName] = errors[propertyName].Append(errorMessage).ToArray(); }
     }
 }

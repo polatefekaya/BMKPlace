@@ -9,7 +9,7 @@ namespace BMKPlace.Domain.Entities;
 public sealed class CanvasUserContext : AggregateRoot<long>
 {
     public int CanvasId {get; private set;}
-    public long UserId {get; private set;}
+    public int UserId {get; private set;}
     public CanvasUserRole Role {get; private set;}
     public DateTimeOffset? LastPixelPlacementTime {get; private set;}
     public TimeSpan? OverrideCooldown {get; private set;}
@@ -19,7 +19,7 @@ public sealed class CanvasUserContext : AggregateRoot<long>
 
     private CanvasUserContext(long id) : base(id){}
 
-    public static CanvasUserContext Create(long id, int canvasId, long userId, CanvasUserRole initialRole = CanvasUserRole.Participant){
+    public static CanvasUserContext Create(long id, int canvasId, int userId, CanvasUserRole initialRole = CanvasUserRole.Participant){
         if (id <= 0) throw new ArgumentException("Context ID must be positive.", nameof(id));
         if (canvasId <= 0) throw new ArgumentException("Canvas ID must be positive.", nameof(canvasId));
         if (userId <= 0) throw new ArgumentException("User ID must be positive.", nameof(userId));
