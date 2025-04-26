@@ -40,6 +40,8 @@ internal class CanvasConfiguration : IEntityTypeConfiguration<Canvas>
         builder.Property(c => c.ColorPaletteId)
             .IsRequired();
 
+        builder.Property(c => c.SchoolId).IsRequired();
+
         // Define the relationship explicitly (optional, but good practice)
         // Assumes a ColorPalette entity exists with a collection of Canvases (which it doesn't need)
         // We mainly care about the FK property Canvas.ColorPaletteId pointing to ColorPalette.Id
@@ -49,10 +51,17 @@ internal class CanvasConfiguration : IEntityTypeConfiguration<Canvas>
                .IsRequired()
                .OnDelete(DeleteBehavior.Restrict); // Prevent deleting a palette if canvases use it
 
+        builder.HasOne<School>() // Relation to School entity
+               .WithMany()      // School doesn't need a collection of Canvases navigation property
+               .HasForeignKey(c => c.SchoolId) // Define the foreign key
+               .IsRequired()
+               .OnDelete(DeleteBehavior.Cascade);
+
         // Add an index on Name for faster lookups (optional)
         builder.HasIndex(c => c.Name).IsUnique(); // Assuming canvas names should be unique
 
         // Add index for efficient lookup by active status
         builder.HasIndex(c => c.IsActive);
+        builder.HasIndex(c => c.SchoolId);
     }
 }

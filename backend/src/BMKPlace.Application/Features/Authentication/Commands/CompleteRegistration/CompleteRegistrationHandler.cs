@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using BMKPlace.Application.Common.Helpers;
 using BMKPlace.Application.Contracts.Abstractions.Authentication;
+using BMKPlace.Application.Contracts.Abstractions.Persistence;
 using BMKPlace.Application.Contracts.DTOs.Authentication;
 using BMKPlace.Infrastructure.Identity;
 using Mediator;
@@ -16,18 +17,21 @@ public class CompleteRegistrationHandler : ICommandHandler<CompleteRegistrationC
     private readonly IOtpService _otpService;
     private readonly UserManager<ApplicationUser> _userManager; // Inject UserManager
     private readonly ITokenService _tokenService;
+    private readonly ISchoolRepository _schoolRepository;
     private readonly ILogger<CompleteRegistrationHandler> _logger;
 
     public CompleteRegistrationHandler(
         IOtpService otpService,
         UserManager<ApplicationUser> userManager,
         ITokenService tokenService,
+        ISchoolRepository schoolRepository,
         ILogger<CompleteRegistrationHandler> logger)
     {
-        _otpService = otpService ?? throw new ArgumentNullException(nameof(otpService));
-        _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
-        _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _otpService = otpService;
+        _userManager = userManager;
+        _tokenService = tokenService;
+        _schoolRepository = schoolRepository;
+        _logger = logger;
     }
     
     public async ValueTask<AuthenticationResponse> Handle(CompleteRegistrationCommand command, CancellationToken cancellationToken)
@@ -35,6 +39,15 @@ public class CompleteRegistrationHandler : ICommandHandler<CompleteRegistrationC
         _logger.LogInformation("Handling CompleteRegistrationCommand for Email {Email}", command.Email);
 
         ValidateCommandInput(command);
+
+        var schoolValidationErrors = new Dictionary<string, List<string>>();
+        if (!await _schoolRepository.ExistsAsync(command.SchoolId, cancellationToken))
+        {
+            ValidationHelpers.AddValidationError(schoolValidationErrors, nameof(command.SchoolId), $"School with ID {command.SchoolId} not found.");
+        }
+        ValidationHelpers.ThrowIfErrorsExist(schoolValidationErrors, "Validation failed for registration request.", _logger, command);
+        //-----------------------------------------
+
         string normalizedEmail = command.Email.ToLowerInvariant().Trim();
 
         _logger.LogDebug("Verifying OTP for potential registration: {Email}", normalizedEmail);
@@ -59,7 +72,8 @@ public class CompleteRegistrationHandler : ICommandHandler<CompleteRegistrationC
         {
             UserName = normalizedEmail, // Consider prompting for a username earlier or generating one? Using email for now.
             Email = normalizedEmail,
-            EmailConfirmed = true 
+            EmailConfirmed = true,
+            SchoolId = command.SchoolId
             // TODO: Set any other required fields for ApplicationUser
         };
 

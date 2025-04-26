@@ -8,4 +8,5 @@ public sealed record CompleteRegistrationCommand : ICommand<AuthenticationRespon
 {
     public required string Email { get; init; }
     public required string Otp { get; init; }
+    public required int SchoolId {get; init;}
 }

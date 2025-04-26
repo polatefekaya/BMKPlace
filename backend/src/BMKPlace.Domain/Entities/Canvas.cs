@@ -14,26 +14,29 @@ public sealed class Canvas : AggregateRoot<int>
     public TimeSpan DefaultCooldown {get; private set;}
     public int ColorPaletteId {get; private set;}
     public bool IsActive {get; private set;}
+    public int SchoolId {get; private set;}
 
     private Canvas() : base(){}
 
     private Canvas(int id) : base(id){}
 
-    public static Canvas Create(int id, string name, int width, int height, TimeSpan defaultCooldown, int colorPaletteId, bool isActive = true){
-        if (id <= 0) throw new ArgumentException("Canvas ID must be positive.", nameof(id));
+    public static Canvas Create(string name, int width, int height, TimeSpan defaultCooldown, int colorPaletteId, int schoolId, bool isActive = true){
+        //if (id <= 0) throw new ArgumentException("Canvas ID must be positive.", nameof(id));
         ArgumentException.ThrowIfNullOrWhiteSpace(name, nameof(name));
         if (width <= 0) throw new DomainValidationException("Canvas width must be positive.");
         if (height <= 0) throw new DomainValidationException("Canvas height must be positive.");
         if (defaultCooldown < TimeSpan.Zero) throw new DomainValidationException("Default cooldown cannot be negative.");
-        if (colorPaletteId <= 0) throw new ArgumentException("Color Palette ID must be positive.", nameof(colorPaletteId)); // Changed check
+        if (colorPaletteId <= 0) throw new ArgumentException("Color Palette ID must be positive.", nameof(colorPaletteId));
+        if (schoolId <= 0) throw new ArgumentException("School ID must be positive.", nameof(schoolId)); 
 
-        Canvas canvas = new(id)
+        Canvas canvas = new()
         {
             Name = name,
             Width = width,
             Height = height,
             DefaultCooldown = defaultCooldown,
             ColorPaletteId = colorPaletteId,
+            SchoolId = schoolId,
             IsActive = isActive
         };
         // canvas.AddDomainEvent(new CanvasCreatedEvent(canvas.Id, ...)); // Example event

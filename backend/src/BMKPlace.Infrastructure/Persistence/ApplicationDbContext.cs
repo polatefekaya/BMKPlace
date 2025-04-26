@@ -9,11 +9,12 @@ namespace BMKPlace.Infrastructure.Persistence;
 
 public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>
 {
-    // DbSets for our Domain Aggregates/Entities
+    public DbSet<School> Schools => Set<School>();
     public DbSet<Canvas> Canvases => Set<Canvas>();
     public DbSet<Pixel> Pixels => Set<Pixel>();
     public DbSet<ColorPalette> ColorPalettes => Set<ColorPalette>();
     public DbSet<CanvasUserContext> CanvasUserContexts => Set<CanvasUserContext>();
+    public DbSet<SchoolAdministratorAssignment> SchoolAdminAssignments => Set<SchoolAdministratorAssignment>();
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)

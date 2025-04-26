@@ -1,11 +1,16 @@
 using System;
 using System.Text;
 using BMKPlace.Application.Contracts.Abstractions.Infrastructure;
+using BMKPlace.Application.Contracts.Abstractions.Persistence;
 using BMKPlace.Application.Contracts.Abstractions.Realtime;
 using BMKPlace.Infrastructure.Caching;
+using BMKPlace.Infrastructure.Identity;
 using BMKPlace.Infrastructure.Options;
+using BMKPlace.Infrastructure.Persistence;
+using BMKPlace.Infrastructure.Persistence.Repositories;
 using BMKPlace.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -26,10 +31,17 @@ public static class DependencyInjection
         // --- Configure Authentication Services ---
         // ... TokenService, OtpService, UserLookupService, AllowedDomainChecker ...
 
-        // --- Configure Infrastructure Services ---
         services.AddSingleton<IDateTimeService, SystemDateTimeService>();
-        services.AddScoped<IEmailService, EmailService>(); // Register EmailService (Scoped is reasonable)
+        services.AddScoped<IEmailService, EmailService>();
+        
+        services.AddScoped<ICanvasRepository, CanvasRepository>();
+        services.AddScoped<IPixelRepository, PixelRepository>();
+        services.AddScoped<IColorPaletteRepository, ColorPaletteRepository>();
+        services.AddScoped<ICanvasUserContextRepository, CanvasUserContextRepository>();
+        services.AddScoped<ISchoolRepository, SchoolRepository>();
 
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        
         // ... Caching registration ...
         // --- Configure Caching ---
         // Remove IDistributedCache registration if present (AddStackExchangeRedisCache or AddDistributedMemoryCache)
@@ -61,6 +73,16 @@ public static class DependencyInjection
             // If Redis isn't mandatory, maybe register a NoOpCache implementation?
             // services.AddScoped<ICanvasCache, NoOpCanvasCache>(); // Example fallback
         }
+
+                // --- Configure Identity ---
+        services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
+        {
+            // ... identity options ...
+        })
+        .AddEntityFrameworkStores<ApplicationDbContext>()
+        .AddDefaultTokenProviders()
+        .AddRoles<IdentityRole<int>>(); // *** Ensure AddRoles<TRole>() is called ***
+
 
         // Register the new ICanvasCache implementation (which now depends on IConnectionMultiplexer)
         services.AddScoped<ICanvasCache, RedisCanvasCache>();
