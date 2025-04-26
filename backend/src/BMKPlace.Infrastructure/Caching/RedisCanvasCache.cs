@@ -5,6 +5,7 @@ using BMKPlace.Application.Contracts.DTOs.Canvas;
 using BMKPlace.Application.Contracts.DTOs.Pixels;
 using BMKPlace.Domain.Entities;
 using BMKPlace.Domain.ValueObjects;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis; 
 using System;
@@ -22,23 +23,67 @@ internal sealed class RedisCanvasCache : ICanvasCache
     private readonly IConnectionMultiplexer _redis;
     private readonly IColorPaletteRepository _paletteRepository;
     private readonly ILogger<RedisCanvasCache> _logger;
+
+    private readonly IMemoryCache _paletteIndexMemoryCache;
+    private static readonly TimeSpan PaletteCacheExpiry = TimeSpan.FromHours(1); // How long to cache palette maps
+
+
     private const string MetaKeyPrefix = "canvas_meta:";
     private const string PixelsKeyPrefix = "canvas_pixels:";
 
     private static readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
+    private const byte ColorIndexNotFound = byte.MaxValue; // Sentinel value
 
     public RedisCanvasCache(
         IConnectionMultiplexer redis, 
         IColorPaletteRepository paletteRepository,
+        IMemoryCache memoryCache,
         ILogger<RedisCanvasCache> logger)
     {
         _redis = redis;
         _paletteRepository = paletteRepository;
+        _paletteIndexMemoryCache = memoryCache;
         _logger = logger;
     }
 
     private static RedisKey GetMetaCacheKey(int canvasId) => new RedisKey($"{MetaKeyPrefix}{canvasId}");
     private static RedisKey GetPixelsCacheKey(int canvasId) => new RedisKey($"{PixelsKeyPrefix}{canvasId}");
+    private static string GetPaletteMemoryCacheKey(int paletteId) => $"palette_map_{paletteId}";
+
+    private async Task<Dictionary<Color, byte>?> GetOrCreatePaletteIndexMapAsync(int paletteId, CancellationToken cancellationToken)
+    {
+        string cacheKey = GetPaletteMemoryCacheKey(paletteId);
+
+        // Try to get from memory cache first
+        if (_paletteIndexMemoryCache.TryGetValue(cacheKey, out Dictionary<Color, byte>? map) && map != null)
+        {
+            _logger.LogDebug("Palette index map found in memory cache for PaletteId {PaletteId}", paletteId);
+            return map;
+        }
+
+        // Not in cache, fetch from repository
+        _logger.LogInformation("Palette index map cache miss for PaletteId {PaletteId}. Fetching from repository.", paletteId);
+        ColorPalette? palette = await _paletteRepository.GetByIdAsync(paletteId, cancellationToken);
+        if (palette == null)
+        {
+            _logger.LogWarning("ColorPalette {PaletteId} not found in repository.", paletteId);
+            return null; // Palette doesn't exist
+        }
+
+        // Build the map
+        map = palette.AllowedColors
+            .Select((color, index) => new { Color = color, Index = (byte)index })
+            .ToDictionary(item => item.Color, item => item.Index);
+
+        // Store in memory cache with expiration
+        var cacheEntryOptions = new MemoryCacheEntryOptions()
+            .SetAbsoluteExpiration(PaletteCacheExpiry); // Set expiry
+
+        _paletteIndexMemoryCache.Set(cacheKey, map, cacheEntryOptions);
+        _logger.LogInformation("Stored palette index map in memory cache for PaletteId {PaletteId}", paletteId);
+
+        return map;
+    }
 
     public async Task<CanvasStateDto?> GetCachedCanvasStateAsync(int canvasId, CancellationToken cancellationToken = default)
     {
@@ -155,18 +200,17 @@ internal sealed class RedisCanvasCache : ICanvasCache
               }
 
             // 2. Get Color Palette to find index (still requires DB lookup or better caching)
-            ColorPalette? palette = await _paletteRepository.GetByIdAsync(meta.ColorPaletteId, cancellationToken);
-            if (palette is null)
+            Dictionary<Color, byte>? paletteMap = await GetOrCreatePaletteIndexMapAsync(meta.ColorPaletteId, cancellationToken);
+            if (paletteMap == null)
             {
-                _logger.LogError("Cannot update pixel: ColorPalette {PaletteId} not found for canvas {CanvasId}.", meta.ColorPaletteId, pixelDto.CanvasId);
-                return;
+                 _logger.LogError("Cannot update pixel: Failed to get or create palette map for PaletteId {PaletteId}", meta.ColorPaletteId);
+                 return;
             }
             Color pixelColor = Color.Create(pixelDto.R, pixelDto.G, pixelDto.B);
-            byte colorIndex = GetColorIndex(palette, pixelColor); // Reuse helper
-            if (colorIndex == byte.MaxValue)
+            if (!paletteMap.TryGetValue(pixelColor, out byte colorIndex))
             {
-                 _logger.LogWarning("Color {Color} from PixelDto not found in palette {PaletteId}. Cannot update cache.", pixelColor, palette.Id);
-                 return;
+                 _logger.LogWarning("Color {Color} from PixelDto not found in cached palette map {PaletteId}. Cannot update cache.", pixelColor, meta.ColorPaletteId);
+                 return; 
             }
 
             // 3. Calculate offset
@@ -181,7 +225,6 @@ internal sealed class RedisCanvasCache : ICanvasCache
 
             ITransaction tran = db.CreateTransaction();
 #pragma warning disable CS8602
-            // Use StringSetRangeAsync which corresponds to SETRANGE command
             _ = tran.StringSetRangeAsync(pixelsKey, offset, colorIndexByte);
             _ = tran.StringSetAsync(metaKey, updatedMetaBytes); // Update metadata with new timestamp
 #pragma warning restore CS8602
@@ -200,17 +243,6 @@ internal sealed class RedisCanvasCache : ICanvasCache
         {
             _logger.LogError(ex, "Error performing efficient pixel update in cache for canvas {CanvasId} at ({X},{Y})", pixelDto.CanvasId, pixelDto.X, pixelDto.Y);
         }
-    }
-
-    private byte GetColorIndex(ColorPalette palette, Color color)
-    {
-        // Inefficient linear search - should be replaced with dictionary lookup
-        // if palette data is cached or loaded more efficiently within this service.
-        for (int i = 0; i < palette.AllowedColors.Count; i++)
-        {
-            if (palette.AllowedColors[i] == color) return (byte)i;
-        }
-        return byte.MaxValue; // Not found
     }
 
     public async Task ClearCacheAsync(int canvasId, CancellationToken cancellationToken = default)

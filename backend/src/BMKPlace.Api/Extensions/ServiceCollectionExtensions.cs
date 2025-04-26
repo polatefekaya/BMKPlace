@@ -1,5 +1,6 @@
-using BMKPlace.Infrastructure.Options; // For JwtOptions
-using Microsoft.AspNetCore.Authentication.Jwt;
+using BMKPlace.Api.Services;
+using BMKPlace.Application.Contracts.Abstractions.Realtime;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -60,6 +61,7 @@ public static class ServiceCollectionExtensions
         });
 
         // Add other presentation-layer services if needed (e.g., HealthChecks, ProblemDetails)
+        services.AddScoped<IPixelBroadcastService, ApiPixelBroadcastService>();
 
         return services;
     }

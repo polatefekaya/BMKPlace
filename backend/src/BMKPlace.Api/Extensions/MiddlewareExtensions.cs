@@ -1,4 +1,5 @@
 using System;
+using BMKPlace.Api.Hubs;
 using BMKPlace.Api.Middleware;
 
 namespace BMKPlace.Api.Extensions;

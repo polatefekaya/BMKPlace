@@ -83,7 +83,7 @@ public static class DependencyInjection
         .AddDefaultTokenProviders()
         .AddRoles<IdentityRole<int>>(); // *** Ensure AddRoles<TRole>() is called ***
 
-
+        services.AddMemoryCache();
         // Register the new ICanvasCache implementation (which now depends on IConnectionMultiplexer)
         services.AddScoped<ICanvasCache, RedisCanvasCache>();
         // --- Configure Real-time Services ---
